@@ -1,0 +1,40 @@
+# Build outputs
+bin/
+obj/
+
+# Visual Studio / JetBrains
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+
+# Local app settings and secrets
+**/appsettings.json
+**/appsettings.Development.json
+**/local.settings.json
+local.settings*.json
+
+# Logs and temp
+*.log
+*.tmp
+*.local
+*.cache
+
+# Azure Functions host files
+host.json.local
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Visual Studio Code workspace
+.vscode/
