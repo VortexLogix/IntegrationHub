@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/IntegrationHub.Api/IntegrationHub.Api.csproj" />
+  <Project Path="src/IntegrationHub.Functions/IntegrationHub.Functions.csproj" />
+  <Project Path="src/IntegrationHub.MockEndpoints/IntegrationHub.MockEndpoints.csproj" />
+  <Project Path="src/IntegrationHub.Tests/IntegrationHub.Tests.csproj" Id="191cea89-c290-4a35-b2a6-6062c26afef5" />
+</Solution>

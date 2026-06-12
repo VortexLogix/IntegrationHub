@@ -1,0 +1,51 @@
+name: Dev - Development Environment
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: dev-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test
+    uses: ./.github/workflows/build-steps-template.yml
+    with:
+      dotnet_version: "10.0.x"
+      solution: "IntegrationHub.slnx"
+      configuration: "Release"
+      build_functions: true
+      build_api: false
+      build_frontend: false
+      publish_project: "src/IntegrationHub.Functions/IntegrationHub.Functions.csproj"
+      functions_artifact_name: "functions-build-dev"
+      artifact_retention_days: 3
+      enforce_coverage: true
+      coverage_threshold: 60
+
+  deploy:
+    name: Deploy dev
+    needs: build-and-test
+    uses: ./.github/workflows/deploy-steps-template.yml
+    with:
+      github_environment: "development"
+      resource_group: "d-az1-ih-integration-rg"
+      bicep_param_file: "./infra/parameters/dev.bicepparam"
+      functions_artifact_name: "functions-build-dev"
+      function_app_name: "d-az1-ih-enrichment-func"
+      azure_location: "eastus"
+      deploy_infra: true
+      deploy_functions: true
+      deploy_api: false
+      deploy_frontend: false
+      smoke_test_apim_url: ""
+      smoke_test_continue_on_error: true
+      show_deployment_summary: true
+      release_notes: "Dev deployment"
+    secrets:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

@@ -1,0 +1,210 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+
+    "parameters": {
+      "$connections": {
+        "defaultValue": {},
+        "type": "Object"
+      }
+    },
+
+    "triggers": {
+      "When_an_HTTP_request_is_received": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "eventId":     { "type": "string" },
+              "eventType":   { "type": "string" },
+              "sourceSystem":{ "type": "string" },
+              "payload":     { "type": "object" }
+            },
+            "required": ["eventId", "eventType", "sourceSystem", "payload"]
+          }
+        }
+      }
+    },
+
+    "actions": {
+
+      "Validate_incoming_event": {
+        "type": "If",
+        "runAfter": {},
+        "expression": {
+          "and": [
+            { "not": { "equals": ["@triggerBody()?['eventId']", ""] } },
+            { "not": { "equals": ["@triggerBody()?['eventType']", ""] } }
+          ]
+        },
+        "actions": {},
+        "else": {
+          "actions": {
+            "Return_400_Bad_Request": {
+              "type": "Response",
+              "inputs": {
+                "statusCode": 400,
+                "headers": { "Content-Type": "application/json" },
+                "body": {
+                  "error": "Invalid event: eventId and eventType are required.",
+                  "correlationId": "@triggerBody()?['eventId']"
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "Call_Enrichment_Function": {
+        "type": "Http",
+        "runAfter": { "Validate_incoming_event": ["Succeeded"] },
+        "inputs": {
+          "method": "POST",
+          "uri": "@parameters('enrichmentFunctionUrl')",
+          "headers": {
+            "Content-Type": "application/json",
+            "x-correlation-id": "@triggerBody()?['eventId']"
+          },
+          "body": "@triggerBody()",
+          "retryPolicy": {
+            "type": "fixed",
+            "count": 3,
+            "interval": "PT10S"
+          }
+        }
+      },
+
+      "Handle_Enrichment_Network_Error": {
+        "type": "Http",
+        "runAfter": { "Call_Enrichment_Function": ["Failed", "TimedOut"] },
+        "inputs": {
+          "method": "POST",
+          "uri": "@parameters('notificationWebhookUrl')",
+          "headers": { "Content-Type": "application/json" },
+          "body": {
+            "alert": "EnrichmentFunctionUnreachable",
+            "correlationId": "@triggerBody()?['eventId']",
+            "message": "Enrichment function failed to respond after 3 retries.",
+            "timestamp": "@utcNow()"
+          }
+        }
+      },
+
+      "Return_503_On_Network_Error": {
+        "type": "Response",
+        "runAfter": { "Handle_Enrichment_Network_Error": ["Succeeded", "Failed"] },
+        "inputs": {
+          "statusCode": 503,
+          "headers": { "Content-Type": "application/json" },
+          "body": {
+            "error": "Enrichment service unavailable. Please retry later.",
+            "correlationId": "@triggerBody()?['eventId']"
+          }
+        }
+      },
+
+      "Check_Enrichment_Success": {
+        "type": "If",
+        "runAfter": { "Call_Enrichment_Function": ["Succeeded"] },
+        "expression": {
+          "and": [
+            { "equals": ["@outputs('Call_Enrichment_Function')['statusCode']", 200] }
+          ]
+        },
+        "actions": {
+
+          "Send_to_Orders_Queue": {
+            "type": "ApiConnection",
+            "inputs": {
+              "host": {
+                "connection": { "name": "@parameters('$connections')['serviceBus']['connectionId']" }
+              },
+              "method": "post",
+              "path": "/@{encodeURIComponent('orders')}/messages",
+              "body": {
+                "ContentData": "@{base64(string(body('Call_Enrichment_Function')))}",
+                "ContentType": "application/json",
+                "Properties": {
+                  "correlationId": "@triggerBody()?['eventId']",
+                  "eventType":     "@triggerBody()?['eventType']",
+                  "sourceSystem":  "@triggerBody()?['sourceSystem']"
+                },
+                "SessionId": "@triggerBody()?['eventId']"
+              }
+            }
+          },
+
+          "Return_202_Accepted": {
+            "type": "Response",
+            "runAfter": { "Send_to_Orders_Queue": ["Succeeded"] },
+            "inputs": {
+              "statusCode": 202,
+              "headers": { "Content-Type": "application/json" },
+              "body": {
+                "status": "Accepted",
+                "correlationId": "@triggerBody()?['eventId']",
+                "message": "Order event enriched and queued for delivery."
+              }
+            }
+          }
+
+        },
+        "else": {
+          "actions": {
+
+            "Log_Enrichment_Failure": {
+              "type": "Http",
+              "inputs": {
+                "method": "POST",
+                "uri": "@parameters('notificationWebhookUrl')",
+                "headers": { "Content-Type": "application/json" },
+                "body": {
+                  "alert": "EnrichmentFunctionFailed",
+                  "correlationId": "@triggerBody()?['eventId']",
+                  "statusCode": "@outputs('Call_Enrichment_Function')['statusCode']",
+                  "timestamp": "@utcNow()"
+                }
+              }
+            },
+
+            "Return_502_Bad_Gateway": {
+              "type": "Response",
+              "runAfter": { "Log_Enrichment_Failure": ["Succeeded", "Failed"] },
+              "inputs": {
+                "statusCode": 502,
+                "headers": { "Content-Type": "application/json" },
+                "body": {
+                  "error": "Enrichment service returned an unexpected response.",
+                  "correlationId": "@triggerBody()?['eventId']"
+                }
+              }
+            }
+
+          }
+        }
+      }
+
+    },
+
+    "outputs": {}
+  },
+
+  "parameters": {
+    "enrichmentFunctionUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "HTTP trigger URL of the EnrichOrderFunction (pulled from Key Vault at deploy time)."
+      }
+    },
+    "notificationWebhookUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Webhook URL for failure alerts (Slack / Teams / custom)."
+      }
+    }
+  }
+}

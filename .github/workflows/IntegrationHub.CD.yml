@@ -1,0 +1,148 @@
+name: CD - Continuous Delivery
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Deploy up to this environment"
+        required: true
+        type: choice
+        options:
+          - test
+          - uat
+          - production
+      release_notes:
+        description: "Release notes"
+        required: false
+        default: ""
+  workflow_run:
+    workflows: ["CI - Integration"]
+    types: [completed]
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  precheck:
+    name: Precheck
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.gate.outputs.should_run }}
+      target: ${{ steps.gate.outputs.target }}
+      notes: ${{ steps.gate.outputs.notes }}
+    steps:
+      - id: gate
+        name: Evaluate trigger
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "target=${{ github.event.inputs.target_environment }}" >> $GITHUB_OUTPUT
+            echo "notes=${{ github.event.inputs.release_notes }}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [ "${{ github.event.workflow_run.conclusion }}" = "success" ] && [ "${{ github.event.workflow_run.head_branch }}" = "main" ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "target=test" >> $GITHUB_OUTPUT
+            echo "notes=Auto-triggered from successful CI run" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "target=test" >> $GITHUB_OUTPUT
+            echo "notes=Skipped" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-test:
+    name: Build and test release
+    if: ${{ needs.precheck.outputs.should_run == 'true' }}
+    needs: precheck
+    uses: ./.github/workflows/build-steps-template.yml
+    with:
+      dotnet_version: "10.0.x"
+      solution: "IntegrationHub.slnx"
+      configuration: "Release"
+      build_functions: true
+      build_api: true
+      build_frontend: false
+      publish_project: "src/IntegrationHub.Functions/IntegrationHub.Functions.csproj"
+      api_publish_project: "src/IntegrationHub.Api/IntegrationHub.Api.csproj"
+      functions_artifact_name: "functions-build-release"
+      api_artifact_name: "api-build-release"
+      artifact_retention_days: 14
+      enforce_coverage: true
+      coverage_threshold: 60
+
+  deploy-test:
+    name: Deploy test
+    if: ${{ needs.precheck.outputs.should_run == 'true' }}
+    needs: [precheck, build-and-test]
+    uses: ./.github/workflows/deploy-steps-template.yml
+    with:
+      github_environment: "test"
+      resource_group: "t-az1-ih-integration-rg"
+      bicep_param_file: "./infra/parameters/test.bicepparam"
+      functions_artifact_name: "functions-build-release"
+      function_app_name: "t-az1-ih-enrichment-func"
+      azure_location: "eastus"
+      deploy_infra: true
+      deploy_functions: true
+      deploy_api: false
+      deploy_frontend: false
+      smoke_test_apim_url: ""
+      smoke_test_continue_on_error: true
+      show_deployment_summary: true
+      release_notes: ${{ needs.precheck.outputs.notes }}
+    secrets:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      APIM_SUBSCRIPTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY_TEST }}
+
+  deploy-uat:
+    name: Deploy uat
+    if: ${{ needs.precheck.outputs.should_run == 'true' && (needs.precheck.outputs.target == 'uat' || needs.precheck.outputs.target == 'production') }}
+    needs: [precheck, deploy-test]
+    uses: ./.github/workflows/deploy-steps-template.yml
+    with:
+      github_environment: "uat"
+      resource_group: "u-az1-ih-integration-rg"
+      bicep_param_file: "./infra/parameters/uat.bicepparam"
+      functions_artifact_name: "functions-build-release"
+      function_app_name: "u-az1-ih-enrichment-func"
+      azure_location: "eastus"
+      deploy_infra: true
+      deploy_functions: true
+      deploy_api: false
+      deploy_frontend: false
+      smoke_test_apim_url: ""
+      smoke_test_continue_on_error: true
+      show_deployment_summary: true
+      release_notes: ${{ needs.precheck.outputs.notes }}
+    secrets:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      APIM_SUBSCRIPTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY_UAT }}
+
+  deploy-production:
+    name: Deploy production
+    if: ${{ needs.precheck.outputs.should_run == 'true' && needs.precheck.outputs.target == 'production' }}
+    needs: [precheck, deploy-uat]
+    uses: ./.github/workflows/deploy-steps-template.yml
+    with:
+      github_environment: "production"
+      resource_group: "p-az1-ih-integration-rg"
+      bicep_param_file: "./infra/parameters/prod.bicepparam"
+      functions_artifact_name: "functions-build-release"
+      function_app_name: "p-az1-ih-enrichment-func"
+      azure_location: "eastus"
+      deploy_infra: true
+      deploy_functions: true
+      deploy_api: false
+      deploy_frontend: false
+      smoke_test_apim_url: ""
+      smoke_test_continue_on_error: false
+      show_deployment_summary: true
+      release_notes: ${{ needs.precheck.outputs.notes }}
+    secrets:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      APIM_SUBSCRIPTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY_PROD }}

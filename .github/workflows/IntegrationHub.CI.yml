@@ -1,0 +1,83 @@
+name: CI - Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test
+    uses: ./.github/workflows/build-steps-template.yml
+    with:
+      dotnet_version: "10.0.x"
+      solution: "IntegrationHub.slnx"
+      configuration: "Release"
+      build_functions: true
+      build_api: true
+      build_frontend: false
+      publish_project: "src/IntegrationHub.Functions/IntegrationHub.Functions.csproj"
+      api_publish_project: "src/IntegrationHub.Api/IntegrationHub.Api.csproj"
+      functions_artifact_name: "functions-build-int"
+      api_artifact_name: "api-build-int"
+      artifact_retention_days: 7
+      enforce_coverage: true
+      coverage_threshold: 60
+
+  what-if:
+    name: Bicep what-if integration
+    if: ${{ github.event_name == 'pull_request' }}
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    environment: integration
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: What-if deployment preview
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            az deployment group what-if \
+              --resource-group i-az1-ih-integration-rg \
+              --template-file ./infra/main.bicep \
+              --parameters ./infra/parameters/int.bicepparam
+
+  deploy-integration:
+    name: Deploy integration
+    if: ${{ github.event_name != 'pull_request' }}
+    needs: build-and-test
+    uses: ./.github/workflows/deploy-steps-template.yml
+    with:
+      github_environment: "integration"
+      resource_group: "i-az1-ih-integration-rg"
+      bicep_param_file: "./infra/parameters/int.bicepparam"
+      functions_artifact_name: "functions-build-int"
+      function_app_name: "i-az1-ih-enrichment-func"
+      azure_location: "eastus"
+      deploy_infra: true
+      deploy_functions: true
+      deploy_api: false
+      deploy_frontend: false
+      smoke_test_apim_url: ""
+      smoke_test_continue_on_error: true
+      show_deployment_summary: true
+      release_notes: "CI deploy to integration"
+    secrets:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

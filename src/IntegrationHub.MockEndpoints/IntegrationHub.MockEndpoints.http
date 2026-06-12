@@ -1,0 +1,6 @@
+@IntegrationHub.MockEndpoints_HostAddress = http://localhost:5215
+
+GET {{IntegrationHub.MockEndpoints_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

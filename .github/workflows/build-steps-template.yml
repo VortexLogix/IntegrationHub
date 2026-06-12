@@ -1,0 +1,184 @@
+name: Build — Reusable steps
+
+permissions:
+  contents: read
+  id-token: write
+
+on:
+  workflow_call:
+    inputs:
+      dotnet_version:
+        required: false
+        type: string
+        default: "10.0.x"
+      solution:
+        required: false
+        type: string
+        default: "IntegrationHub.slnx"
+      configuration:
+        required: false
+        type: string
+        default: "Release"
+      build_functions:
+        required: false
+        type: boolean
+        default: true
+      build_api:
+        required: false
+        type: boolean
+        default: false
+      build_frontend:
+        required: false
+        type: boolean
+        default: false
+      publish_project:
+        required: false
+        type: string
+        default: "src/IntegrationHub.Functions/IntegrationHub.Functions.csproj"
+      api_publish_project:
+        required: false
+        type: string
+        default: "src/IntegrationHub.Api/IntegrationHub.Api.csproj"
+      functions_artifact_name:
+        required: false
+        type: string
+        default: "functions-build"
+      api_artifact_name:
+        required: false
+        type: string
+        default: "api-build"
+      frontend_artifact_name:
+        required: false
+        type: string
+        default: "frontend-build"
+      node_version:
+        required: false
+        type: string
+        default: '18'
+      artifact_retention_days:
+        required: false
+        type: number
+        default: 14
+      enforce_coverage:
+        required: false
+        type: boolean
+        default: false
+      coverage_threshold:
+        required: false
+        type: number
+        default: 60
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ inputs.dotnet_version }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet_version }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore dependencies
+        if: ${{ inputs.build_functions || inputs.build_api }}
+        run: dotnet restore ${{ inputs.solution }}
+
+      - name: Build (.NET) (${{ inputs.configuration }})
+        if: ${{ inputs.build_functions || inputs.build_api }}
+        run: dotnet build ${{ inputs.solution }} --no-restore --configuration ${{ inputs.configuration }}
+
+      - name: Run unit tests
+        if: ${{ inputs.build_functions || inputs.build_api }}
+        run: |
+          dotnet test ${{ inputs.solution }} \
+            --no-build \
+            --configuration ${{ inputs.configuration }} \
+            --verbosity normal \
+            --logger "trx;LogFileName=test-results.trx"
+
+      - name: Run coverage gate
+        if: ${{ (inputs.build_functions || inputs.build_api) && inputs.enforce_coverage }}
+        run: |
+          dotnet test ${{ inputs.solution }} \
+            --no-build \
+            --configuration ${{ inputs.configuration }} \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=cobertura \
+            /p:Threshold=${{ inputs.coverage_threshold }} \
+            /p:ThresholdType=line \
+            /p:ThresholdStat=total
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/*.trx"
+          retention-days: ${{ inputs.artifact_retention_days }}
+
+      - name: Publish Function App
+        if: ${{ inputs.build_functions }}
+        run: |
+          dotnet publish \
+            ${{ inputs.publish_project }} \
+            --no-restore \
+            --configuration ${{ inputs.configuration }} \
+            --output ./publish/functions
+
+      - name: Upload Function App artifact
+        if: ${{ inputs.build_functions }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.functions_artifact_name }}
+          path: ./publish/functions
+          retention-days: ${{ inputs.artifact_retention_days }}
+
+      - name: Setup Node.js
+        if: ${{ inputs.build_frontend }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+
+      - name: Install frontend dependencies
+        if: ${{ inputs.build_frontend }}
+        run: npm ci
+        working-directory: src/frontend
+
+      - name: Build frontend
+        if: ${{ inputs.build_frontend }}
+        run: npm run build
+        working-directory: src/frontend
+
+      - name: Upload frontend artifact
+        if: ${{ inputs.build_frontend }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.frontend_artifact_name }}
+          path: src/frontend/dist
+          retention-days: ${{ inputs.artifact_retention_days }}
+
+      - name: Publish API (optional)
+        if: ${{ inputs.build_api }}
+        run: |
+          dotnet publish \
+            ${{ inputs.api_publish_project }} \
+            --no-restore \
+            --configuration ${{ inputs.configuration }} \
+            --output ./publish/api
+
+      - name: Upload API artifact
+        if: ${{ inputs.build_api }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.api_artifact_name }}
+          path: ./publish/api
+          retention-days: ${{ inputs.artifact_retention_days }}

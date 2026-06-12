@@ -1,0 +1,177 @@
+name: Deploy — Reusable steps
+
+permissions:
+  contents: read
+  id-token: write
+
+on:
+  workflow_call:
+    inputs:
+      resource_group:
+        required: true
+        type: string
+      github_environment:
+        required: false
+        type: string
+        default: ""
+      bicep_param_file:
+        required: true
+        type: string
+      functions_artifact_name:
+        required: false
+        type: string
+        default: ""
+      function_app_name:
+        required: false
+        type: string
+        default: ""
+      api_artifact_name:
+        required: false
+        type: string
+        default: ""
+      frontend_artifact_name:
+        required: false
+        type: string
+        default: ""
+      azure_location:
+        required: false
+        type: string
+        default: "eastus"
+      deploy_infra:
+        required: false
+        type: boolean
+        default: true
+      deploy_functions:
+        required: false
+        type: boolean
+        default: true
+      deploy_api:
+        required: false
+        type: boolean
+        default: false
+      deploy_frontend:
+        required: false
+        type: boolean
+        default: false
+      smoke_test_apim_url:
+        required: false
+        type: string
+        default: ""
+      smoke_test_continue_on_error:
+        required: false
+        type: boolean
+        default: true
+      show_deployment_summary:
+        required: false
+        type: boolean
+        default: false
+      release_notes:
+        required: false
+        type: string
+        default: ""
+    secrets:
+      AZURE_CREDENTIALS:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      APIM_SUBSCRIPTION_KEY:
+        required: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.github_environment }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Deployment summary
+        if: ${{ inputs.show_deployment_summary }}
+        run: |
+          echo "## Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "| Key | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered by | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Release notes | ${{ inputs.release_notes || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Ensure resource group exists
+        if: ${{ inputs.deploy_infra }}
+        run: |
+          az group create \
+            --name ${{ inputs.resource_group }} \
+            --location ${{ inputs.azure_location }} \
+            --tags environment=${{ inputs.resource_group }} project=IntegrationHub
+
+      - name: Deploy Bicep infrastructure
+        if: ${{ inputs.deploy_infra }}
+        uses: azure/arm-deploy@v2
+        with:
+          scope: resourcegroup
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ inputs.resource_group }}
+          template: ./infra/main.bicep
+          parameters: ${{ inputs.bicep_param_file }}
+          failOnStdErr: false
+
+      - name: Download Functions artifact
+        if: ${{ inputs.deploy_functions && inputs.functions_artifact_name != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.functions_artifact_name }}
+          path: ./publish/functions
+
+      - name: Deploy Functions
+        if: ${{ inputs.deploy_functions && inputs.functions_artifact_name != '' }}
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ inputs.function_app_name }}
+          package: "./publish/functions"
+
+      - name: Download API artifact
+        if: ${{ inputs.deploy_api && inputs.api_artifact_name != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.api_artifact_name }}
+          path: ./publish/api
+
+      - name: Deploy API (placeholder)
+        if: ${{ inputs.deploy_api && inputs.api_artifact_name != '' }}
+        run: |
+          echo "Deploy API artifacts from ./publish/api (implement specific deployment action)"
+
+      - name: Download frontend artifact
+        if: ${{ inputs.deploy_frontend && inputs.frontend_artifact_name != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.frontend_artifact_name }}
+          path: ./publish/frontend
+
+      - name: Deploy Frontend (placeholder)
+        if: ${{ inputs.deploy_frontend && inputs.frontend_artifact_name != '' }}
+        run: |
+          echo "Deploy frontend artifacts from ./publish/frontend (implement specific deployment action)"
+
+      - name: Smoke test
+        if: inputs.smoke_test_apim_url != ''
+        run: |
+          echo "Running smoke test..."
+          APIM_URL="${{ inputs.smoke_test_apim_url }}"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Ocp-Apim-Subscription-Key: ${{ secrets.APIM_SUBSCRIPTION_KEY }}" \
+            "$APIM_URL")
+          echo "Smoke test returned HTTP $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            if [ "${{ inputs.smoke_test_continue_on_error }}" = "true" ]; then
+              echo "Non-200 status but continuing as configured."
+            else
+              echo "Failing due to non-200 smoke test"
+              exit 1
+            fi
+          fi
+        continue-on-error: ${{ inputs.smoke_test_continue_on_error }}
