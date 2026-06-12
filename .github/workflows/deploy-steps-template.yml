@@ -158,7 +158,7 @@ jobs:
           echo "Deploy frontend artifacts from ./publish/frontend (implement specific deployment action)"
 
       - name: Smoke test
-        if: inputs.smoke_test_apim_url != ''
+        if: ${{ inputs.smoke_test_apim_url != '' }}
         run: |
           echo "Running smoke test..."
           APIM_URL="${{ inputs.smoke_test_apim_url }}"

@@ -1,5 +1,9 @@
 name: CD - Continuous Delivery
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   workflow_dispatch:
     inputs:
