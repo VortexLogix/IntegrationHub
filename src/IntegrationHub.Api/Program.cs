@@ -1,6 +1,6 @@
 using Azure.Data.Tables;
 using Azure.Identity;
-using IntegrationHub.Api.Services;
+using IntegrationHub.Functions.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,5 +1,5 @@
 using IntegrationHub.Api.Models;
-using IntegrationHub.Api.Services;
+using IntegrationHub.Functions.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IntegrationHub.Api.Controllers;
@@ -37,7 +37,7 @@ public sealed class StatusController : ControllerBase
             });
         }
 
-        var entity = await _statusStore.GetStatusAsync(correlationId, cancellationToken).ConfigureAwait(false);
+        var entity = await _statusStore.GetStatusAsync(correlationId, null, cancellationToken).ConfigureAwait(false);
 
         if (entity is null)
         {
@@ -50,7 +50,7 @@ public sealed class StatusController : ControllerBase
 
         var response = new StatusResponse
         {
-            CorrelationId = entity.CorrelationId,
+            CorrelationId = entity.RowKey,
             Status = entity.Status,
             Message = entity.Message,
             LastUpdatedUtc = entity.LastUpdatedUtc
