@@ -1,8 +1,11 @@
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace IntegrationHub.Functions.Services;
 
+[ExcludeFromCodeCoverage]
 public sealed class BlobIdempotencyService : IIdempotencyService
 {
     private readonly BlobContainerClient _containerClient;
@@ -16,6 +19,7 @@ public sealed class BlobIdempotencyService : IIdempotencyService
         }
 
         _containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+        _containerClient.CreateIfNotExistsAsync().GetAwaiter().GetResult();
     }
 
     public async Task<bool> IsDuplicateAsync(string eventId, CancellationToken cancellationToken)
@@ -27,7 +31,6 @@ public sealed class BlobIdempotencyService : IIdempotencyService
 
     public async Task MarkProcessedAsync(string eventId, CancellationToken cancellationToken)
     {
-        await _containerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
         var blobClient = _containerClient.GetBlobClient(GetBlobName(eventId));
         await blobClient.UploadAsync(BinaryData.FromString(string.Empty), overwrite: true, cancellationToken).ConfigureAwait(false);
     }

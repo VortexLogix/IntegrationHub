@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - develop
+      - feature/**
   workflow_dispatch:
 
 concurrency:
@@ -23,7 +24,7 @@ jobs:
       solution: "IntegrationHub.slnx"
       configuration: "Release"
       build_functions: true
-      build_api: false
+      build_api: true
       build_frontend: false
       publish_project: "src/IntegrationHub.Functions/IntegrationHub.Functions.csproj"
       functions_artifact_name: "functions-build-dev"

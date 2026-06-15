@@ -79,6 +79,18 @@ resource idempotencyContainer 'Microsoft.Storage/storageAccounts/blobServices/co
   }
 }
 
+// Table service — needed to create status tracking table
+resource tableService 'Microsoft.Storage/storageAccounts/tableServices@2023-05-01' = {
+  parent: storageAccount
+  name: 'default'
+}
+
+// Order status table: tracks enrichment and ERP delivery status per correlationId
+resource statusTable 'Microsoft.Storage/storageAccounts/tableServices/tables@2023-05-01' = {
+  parent: tableService
+  name: 'OrderStatus'
+}
+
 // ── Outputs ───────────────────────────────────────────────────────────────────
 
 @description('Name of the Storage Account (used by Function App settings).')

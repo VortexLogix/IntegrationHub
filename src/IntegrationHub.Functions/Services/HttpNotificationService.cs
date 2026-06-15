@@ -2,8 +2,11 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace IntegrationHub.Functions.Services;
 
+[ExcludeFromCodeCoverage]
 public sealed class HttpNotificationService : INotificationService
 {
     private readonly HttpClient _httpClient;

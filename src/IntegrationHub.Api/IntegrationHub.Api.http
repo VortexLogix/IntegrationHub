@@ -1,6 +1,11 @@
 @IntegrationHub.Api_HostAddress = http://localhost:5232
 
-GET {{IntegrationHub.Api_HostAddress}}/weatherforecast/
+GET {{IntegrationHub.Api_HostAddress}}/api/status/health
+Accept: application/json
+
+###
+
+GET {{IntegrationHub.Api_HostAddress}}/api/status/test-001
 Accept: application/json
 
 ###

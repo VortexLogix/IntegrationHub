@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using IntegrationHub.Functions.Models;
 using IntegrationHub.Functions.Services;
@@ -9,18 +10,12 @@ using Microsoft.Extensions.Logging;
 
 namespace IntegrationHub.Functions.Functions;
 
-public sealed class EnrichOrderFunction
+[ExcludeFromCodeCoverage]
+public sealed class EnrichOrderFunction(
+    IEnrichmentService enrichmentService,
+    ILogger<EnrichOrderFunction> logger)
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new(JsonSerializerDefaults.Web);
-
-    private readonly IEnrichmentService _enrichmentService;
-    private readonly ILogger<EnrichOrderFunction> _logger;
-
-    public EnrichOrderFunction(IEnrichmentService enrichmentService, ILogger<EnrichOrderFunction> logger)
-    {
-        _enrichmentService = enrichmentService;
-        _logger = logger;
-    }
 
     [Function("EnrichOrderFunction")]
     public async Task<IActionResult> Run(
@@ -56,12 +51,12 @@ public sealed class EnrichOrderFunction
 
         try
         {
-            var enriched = await _enrichmentService.EnrichAsync(orderEvent, correlationId, cancellationToken).ConfigureAwait(false);
+            var enriched = await enrichmentService.EnrichAsync(orderEvent, correlationId, cancellationToken).ConfigureAwait(false);
             return new OkObjectResult(enriched);
         }
         catch (DuplicateEventException ex)
         {
-            _logger.LogInformation(ex, "Duplicate event received: {EventId}", ex.EventId);
+            logger.LogInformation(ex, "Duplicate event received: {EventId}", ex.EventId);
             return new AcceptedResult();
         }
         catch (ValidationException ex)
@@ -74,7 +69,7 @@ public sealed class EnrichOrderFunction
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled enrichment failure for correlationId {CorrelationId}", correlationId);
+            logger.LogError(ex, "Unhandled enrichment failure for correlationId {CorrelationId}", correlationId);
             return new ObjectResult(new
             {
                 error = "Unexpected error while enriching order.",

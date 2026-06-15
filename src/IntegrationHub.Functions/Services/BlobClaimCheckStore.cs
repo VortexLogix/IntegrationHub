@@ -1,8 +1,11 @@
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace IntegrationHub.Functions.Services;
 
+[ExcludeFromCodeCoverage]
 public sealed class BlobClaimCheckStore : IClaimCheckStore
 {
     private readonly BlobContainerClient _containerClient;
@@ -16,11 +19,11 @@ public sealed class BlobClaimCheckStore : IClaimCheckStore
         }
 
         _containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+        _containerClient.CreateIfNotExistsAsync().GetAwaiter().GetResult();
     }
 
     public async Task<string> SavePayloadAsync(string correlationId, BinaryData payload, CancellationToken cancellationToken)
     {
-        await _containerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
         var blobName = $"{DateTime.UtcNow:yyyyMMdd}/{Uri.EscapeDataString(correlationId)}-{Guid.NewGuid():N}.json";
         var blobClient = _containerClient.GetBlobClient(blobName);

@@ -4,6 +4,7 @@ using IntegrationHub.Functions.Models;
 using IntegrationHub.Functions.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
+using Xunit;
 
 namespace IntegrationHub.Tests;
 

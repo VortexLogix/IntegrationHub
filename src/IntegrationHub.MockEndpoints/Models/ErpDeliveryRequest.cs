@@ -11,4 +11,6 @@ public sealed class ErpDeliveryRequest
     public int Quantity { get; init; }
 
     public decimal TotalAmount { get; init; }
+
+    public string DeliveryPriority { get; init; } = string.Empty;
 }

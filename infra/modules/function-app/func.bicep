@@ -117,6 +117,11 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
           value: 'erp-delivery'
         }
         {
+          // Table name for order status tracking.
+          name: 'StatusTableName'
+          value: 'OrderStatus'
+        }
+        {
           // Downstream ERP endpoint — pulled from Key Vault at runtime.
           name: 'ErpEndpointUrl'
           value: '${kvRef}ErpEndpointUrl)'

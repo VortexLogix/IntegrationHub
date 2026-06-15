@@ -135,7 +135,8 @@ module apiManagement 'modules/api-management/apim.bicep' = {
 var kvSecretsUserRoleId     = '4633458b-17de-408a-b874-0445c86b69e6'  // Key Vault Secrets User
 var sbDataReceiverRoleId    = '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'  // Azure Service Bus Data Receiver
 var sbDataSenderRoleId      = '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'  // Azure Service Bus Data Sender
-var storageBlobContribRoleId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe' // Storage Blob Data Contributor
+var storageBlobContribRoleId  = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe' // Storage Blob Data Contributor
+var storageTableContribRoleId = '0a9a7e1f-b9d0-4e29-b0e1-e8d6b6f0e8e1' // Storage Table Data Contributor
 
 // Function App — Key Vault Secrets User
 resource funcKvRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
@@ -177,6 +178,17 @@ resource logicAppSbSenderRole 'Microsoft.Authorization/roleAssignments@2022-04-0
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', sbDataSenderRoleId)
     principalId: logicApp.outputs.logicAppPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Function App — Storage Table Data Contributor (status tracking)
+resource funcTableRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(storage.outputs.storageAccountId, functionApp.outputs.functionAppPrincipalId, storageTableContribRoleId)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageTableContribRoleId)
+    principalId: functionApp.outputs.functionAppPrincipalId
     principalType: 'ServicePrincipal'
   }
 }

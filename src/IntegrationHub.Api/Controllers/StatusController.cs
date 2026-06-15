@@ -1,4 +1,5 @@
 using IntegrationHub.Api.Models;
+using IntegrationHub.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IntegrationHub.Api.Controllers;
@@ -7,6 +8,13 @@ namespace IntegrationHub.Api.Controllers;
 [Route("api/status")]
 public sealed class StatusController : ControllerBase
 {
+    private readonly IStatusStore _statusStore;
+
+    public StatusController(IStatusStore statusStore)
+    {
+        _statusStore = statusStore;
+    }
+
     [HttpGet("health")]
     public IActionResult GetHealth()
     {
@@ -19,7 +27,7 @@ public sealed class StatusController : ControllerBase
     }
 
     [HttpGet("{correlationId}")]
-    public ActionResult<StatusResponse> GetByCorrelationId(string correlationId)
+    public async Task<ActionResult<StatusResponse>> GetByCorrelationId(string correlationId, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(correlationId))
         {
@@ -29,12 +37,23 @@ public sealed class StatusController : ControllerBase
             });
         }
 
+        var entity = await _statusStore.GetStatusAsync(correlationId, cancellationToken).ConfigureAwait(false);
+
+        if (entity is null)
+        {
+            return NotFound(new
+            {
+                error = $"No status found for correlationId '{correlationId}'. The event may not have been processed yet.",
+                correlationId
+            });
+        }
+
         var response = new StatusResponse
         {
-            CorrelationId = correlationId,
-            Status = "Accepted",
-            Message = "Event has been accepted for asynchronous processing.",
-            LastUpdatedUtc = DateTimeOffset.UtcNow
+            CorrelationId = entity.CorrelationId,
+            Status = entity.Status,
+            Message = entity.Message,
+            LastUpdatedUtc = entity.LastUpdatedUtc
         };
 
         return Ok(response);

@@ -1,6 +1,26 @@
 @IntegrationHub.MockEndpoints_HostAddress = http://localhost:5215
 
-GET {{IntegrationHub.MockEndpoints_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{IntegrationHub.MockEndpoints_HostAddress}}/api/crm/orders
+Content-Type: application/json
+
+{
+  "customerId": "C-1234",
+  "productCode": "SKU-9001",
+  "quantity": 3
+}
+
+###
+
+POST {{IntegrationHub.MockEndpoints_HostAddress}}/api/erp/deliveries
+Content-Type: application/json
+
+{
+  "correlationId": "evt-test-001",
+  "eventId": "evt-test-001",
+  "productCode": "SKU-9001",
+  "quantity": 3,
+  "totalAmount": 3897.00,
+  "deliveryPriority": "standard"
+}
 
 ###

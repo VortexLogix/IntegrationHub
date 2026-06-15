@@ -25,6 +25,10 @@ on:
         required: false
         type: string
         default: ""
+      api_app_name:
+        required: false
+        type: string
+        default: ""
       api_artifact_name:
         required: false
         type: string
@@ -140,10 +144,12 @@ jobs:
           name: ${{ inputs.api_artifact_name }}
           path: ./publish/api
 
-      - name: Deploy API (placeholder)
+      - name: Deploy API
         if: ${{ inputs.deploy_api && inputs.api_artifact_name != '' }}
-        run: |
-          echo "Deploy API artifacts from ./publish/api (implement specific deployment action)"
+        uses: Azure/webapps-deploy@v3
+        with:
+          app-name: ${{ inputs.api_app_name }}
+          package: "./publish/api"
 
       - name: Download frontend artifact
         if: ${{ inputs.deploy_frontend && inputs.frontend_artifact_name != '' }}
@@ -162,15 +168,19 @@ jobs:
         run: |
           echo "Running smoke test..."
           APIM_URL="${{ inputs.smoke_test_apim_url }}"
+          SAMPLE_PAYLOAD='{"eventId":"smoke-001","eventType":"OrderCreated","sourceSystem":"SmokeTest","payload":{"productCode":"SKU-9001","quantity":1}}'
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
             -H "Ocp-Apim-Subscription-Key: ${{ secrets.APIM_SUBSCRIPTION_KEY }}" \
+            -d "$SAMPLE_PAYLOAD" \
             "$APIM_URL")
           echo "Smoke test returned HTTP $STATUS"
-          if [ "$STATUS" != "200" ]; then
+          if [ "$STATUS" != "202" ] && [ "$STATUS" != "200" ]; then
             if [ "${{ inputs.smoke_test_continue_on_error }}" = "true" ]; then
-              echo "Non-200 status but continuing as configured."
+              echo "Non-success status ($STATUS) but continuing as configured."
             else
-              echo "Failing due to non-200 smoke test"
+              echo "Failing due to smoke test failure (HTTP $STATUS)"
               exit 1
             fi
           fi

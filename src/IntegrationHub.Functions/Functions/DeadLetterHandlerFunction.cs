@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using IntegrationHub.Functions.Services;
@@ -7,31 +8,21 @@ using Microsoft.Extensions.Logging;
 
 namespace IntegrationHub.Functions.Functions;
 
-public sealed class DeadLetterHandlerFunction
+[ExcludeFromCodeCoverage]
+public sealed class DeadLetterHandlerFunction(
+    IConfiguration configuration,
+    INotificationService notificationService,
+    ILogger<DeadLetterHandlerFunction> logger)
 {
-    private readonly IConfiguration _configuration;
-    private readonly INotificationService _notificationService;
-    private readonly ILogger<DeadLetterHandlerFunction> _logger;
-
-    public DeadLetterHandlerFunction(
-        IConfiguration configuration,
-        INotificationService notificationService,
-        ILogger<DeadLetterHandlerFunction> logger)
-    {
-        _configuration = configuration;
-        _notificationService = notificationService;
-        _logger = logger;
-    }
-
     [Function("DeadLetterHandlerFunction")]
     public async Task Run([TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo, CancellationToken cancellationToken)
     {
-        var fullyQualifiedNamespace = _configuration["ServiceBusConnection__fullyQualifiedNamespace"];
-        var queueName = _configuration["ServiceBusOrdersQueueName"] ?? "orders";
+        var fullyQualifiedNamespace = configuration["ServiceBusConnection__fullyQualifiedNamespace"];
+        var queueName = configuration["ServiceBusOrdersQueueName"] ?? "orders";
 
         if (string.IsNullOrWhiteSpace(fullyQualifiedNamespace))
         {
-            _logger.LogWarning("ServiceBusConnection__fullyQualifiedNamespace is not configured; dead-letter handler skipped.");
+            logger.LogWarning("ServiceBusConnection__fullyQualifiedNamespace is not configured; dead-letter handler skipped.");
             return;
         }
 
@@ -53,15 +44,14 @@ public sealed class DeadLetterHandlerFunction
 
             var correlationId = message.CorrelationId ?? message.MessageId;
 
-            _logger.LogError(
+            logger.LogError(
                 "Dead-letter message detected. MessageId: {MessageId}, CorrelationId: {CorrelationId}, Reason: {Reason}, Description: {Description}",
                 message.MessageId,
                 correlationId,
                 message.DeadLetterReason,
                 message.DeadLetterErrorDescription);
 
-            // Send webhook alert so the operations team is notified immediately.
-            await _notificationService.SendDeadLetterAlertAsync(
+            await notificationService.SendDeadLetterAlertAsync(
                 message.MessageId,
                 correlationId,
                 message.DeadLetterReason,
@@ -72,7 +62,7 @@ public sealed class DeadLetterHandlerFunction
             processedCount++;
         }
 
-        _logger.LogInformation(
+        logger.LogInformation(
             "Dead-letter queue scan completed at {UtcNow}. Messages processed: {Count}.",
             DateTimeOffset.UtcNow,
             processedCount);
