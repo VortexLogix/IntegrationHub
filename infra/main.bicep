@@ -140,7 +140,7 @@ var storageTableContribRoleId = '0a9a7e1f-b9d0-4e29-b0e1-e8d6b6f0e8e1' // Storag
 
 // Function App — Key Vault Secrets User
 resource funcKvRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(keyVault.outputs.keyVaultId, functionApp.outputs.functionAppPrincipalId, kvSecretsUserRoleId)
+  name: guid(namePrefix, 'func-kv', kvSecretsUserRoleId)
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', kvSecretsUserRoleId)
@@ -151,7 +151,7 @@ resource funcKvRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 
 // Function App — Storage Blob Data Contributor (Managed Identity blob access)
 resource funcStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storage.outputs.storageAccountId, functionApp.outputs.functionAppPrincipalId, storageBlobContribRoleId)
+  name: guid(namePrefix, 'func-stg', storageBlobContribRoleId)
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobContribRoleId)
@@ -162,7 +162,7 @@ resource funcStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = 
 
 // Function App — Azure Service Bus Data Receiver (reads from DLQ)
 resource funcSbReceiverRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(serviceBus.outputs.namespaceId, functionApp.outputs.functionAppPrincipalId, sbDataReceiverRoleId)
+  name: guid(namePrefix, 'func-sb-recv', sbDataReceiverRoleId)
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', sbDataReceiverRoleId)
@@ -173,7 +173,7 @@ resource funcSbReceiverRole 'Microsoft.Authorization/roleAssignments@2022-04-01'
 
 // Logic App — Azure Service Bus Data Sender (sends enriched orders to queue)
 resource logicAppSbSenderRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(serviceBus.outputs.namespaceId, logicApp.outputs.logicAppPrincipalId, sbDataSenderRoleId)
+  name: guid(namePrefix, 'la-sb-send', sbDataSenderRoleId)
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', sbDataSenderRoleId)
@@ -184,7 +184,7 @@ resource logicAppSbSenderRole 'Microsoft.Authorization/roleAssignments@2022-04-0
 
 // Function App — Storage Table Data Contributor (status tracking)
 resource funcTableRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storage.outputs.storageAccountId, functionApp.outputs.functionAppPrincipalId, storageTableContribRoleId)
+  name: guid(namePrefix, 'func-tbl', storageTableContribRoleId)
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageTableContribRoleId)
@@ -195,7 +195,7 @@ resource funcTableRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 
 // Logic App — Key Vault Secrets User (reads webhook URL from Key Vault)
 resource logicAppKvRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(keyVault.outputs.keyVaultId, logicApp.outputs.logicAppPrincipalId, kvSecretsUserRoleId)
+  name: guid(namePrefix, 'la-kv', kvSecretsUserRoleId)
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', kvSecretsUserRoleId)
