@@ -42,7 +42,7 @@ param backendUrl string
 // ── Resources ─────────────────────────────────────────────────────────────────
 
 // API Management instance — Consumption tier (no infrastructure to manage)
-resource apim 'Microsoft.ApiManagement/service@2023-09-01-preview' = {
+resource apim 'Microsoft.ApiManagement/service@2022-08-01' = {
   name: '${namePrefix}-gateway-apim'
   location: location
   tags: tags
@@ -62,7 +62,7 @@ resource apim 'Microsoft.ApiManagement/service@2023-09-01-preview' = {
 }
 
 // ── Logger: connect APIM to App Insights ──────────────────────────────────────
-resource apimLogger 'Microsoft.ApiManagement/service/loggers@2023-09-01-preview' = {
+resource apimLogger 'Microsoft.ApiManagement/service/loggers@2022-08-01' = {
   parent: apim
   name: '${namePrefix}-telemetry-ai'
   properties: {
@@ -77,7 +77,7 @@ resource apimLogger 'Microsoft.ApiManagement/service/loggers@2023-09-01-preview'
 }
 
 // ── Integration Hub API definition ───────────────────────────────────────────
-resource integrationHubApi 'Microsoft.ApiManagement/service/apis@2023-09-01-preview' = {
+resource integrationHubApi 'Microsoft.ApiManagement/service/apis@2022-08-01' = {
   parent: apim
   name: 'integration-hub-api'
   properties: {
@@ -95,7 +95,7 @@ resource integrationHubApi 'Microsoft.ApiManagement/service/apis@2023-09-01-prev
 }
 
 // ── POST /events operation ────────────────────────────────────────────────────
-resource postEventsOperation 'Microsoft.ApiManagement/service/apis/operations@2023-09-01-preview' = {
+resource postEventsOperation 'Microsoft.ApiManagement/service/apis/operations@2022-08-01' = {
   parent: integrationHubApi
   name: 'post-events'
   properties: {
@@ -145,7 +145,7 @@ resource postEventsOperation 'Microsoft.ApiManagement/service/apis/operations@20
 }
 
 // ── Inbound policy: rate limiting + JWT validation + logging ──────────────────
-resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2023-09-01-preview' = {
+resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-01' = {
   parent: integrationHubApi
   name: 'policy'
   properties: {

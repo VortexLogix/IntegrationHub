@@ -27,6 +27,13 @@ builder.Services.AddSingleton<IStatusStore, TableStatusStore>();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
+var options = new DefaultFilesOptions();
+options.DefaultFileNames.Clear();
+options.DefaultFileNames.Add("index.html");
+app.UseDefaultFiles(options);
+app.UseStaticFiles();
+
 app.MapControllers();
 
 app.Run();

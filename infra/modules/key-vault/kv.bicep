@@ -43,9 +43,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enableSoftDelete: true
     softDeleteRetentionInDays: 7    // Minimum; use 90 in prod
 
-    // Purge protection prevents permanent deletion during retention period.
-    enablePurgeProtection: false    // Set to true in prod
-
     publicNetworkAccess: 'Enabled'  // Restrict to VNet in prod hardening
 
     networkAcls: {

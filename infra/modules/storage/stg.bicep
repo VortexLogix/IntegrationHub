@@ -13,6 +13,7 @@
 // ── Parameters ───────────────────────────────────────────────────────────────
 
 @description('Shared name prefix: {env}-az1-ih')
+@minLength(1)
 param namePrefix string
 
 @description('Azure region for this resource.')

@@ -7,7 +7,7 @@
 // Tier choice : Basic — free tier compatible (10 M ops first 12 months).
 //               Upgrade to Standard if Topics/Subscriptions are needed later.
 //
-// Name produced: {namePrefix}-order-events-sb
+// Name produced: {namePrefix}-order-events-ns
 // =============================================================================
 
 // ── Parameters ───────────────────────────────────────────────────────────────
@@ -25,7 +25,7 @@ param tags object
 
 // Service Bus Namespace
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
-  name: '${namePrefix}-order-events-sb'
+  name: '${namePrefix}-order-events-ns'
   location: location
   tags: tags
   sku: {
