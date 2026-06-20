@@ -52,7 +52,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
     tier: 'Dynamic'
   }
   properties: {
-    reserved: false   // false = Windows; set true for Linux
+    reserved: true   // true = Linux (pipeline builds on ubuntu-latest)
   }
 }
 
@@ -61,7 +61,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: '${namePrefix}-enrichment-func'
   location: location
   tags: tags
-  kind: 'functionapp'
+  kind: 'functionapp,linux'
 
   // Enable system-assigned Managed Identity so it can read from Key Vault
   // and connect to Service Bus without storing credentials.
@@ -74,9 +74,8 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
     httpsOnly: true    // Force HTTPS — never allow plain HTTP
 
     siteConfig: {
-      // .NET 10 isolated worker requires this exact stack config.
-      netFrameworkVersion: 'v10.0'
-      use32BitWorkerProcess: false
+      // Linux .NET 10 isolated worker — matches pipeline (ubuntu-latest)
+      linuxFxVersion: 'DOTNET|10.0'
 
       // App settings — all sensitive values come from Key Vault references.
       appSettings: [
