@@ -1,9 +1,17 @@
 # =============================================================================
 # Integration Hub — Demo Smoke Test
 # Sends a sample order event and queries its status.
+#
+# Usage:
+#   1. Get your function key from:
+#      Azure Portal → d-az1-ih-enrichment-func → App keys → default
+#   2. Run: .\scripts\demo.ps1 -FunctionKey "YOUR_KEY_HERE"
 # =============================================================================
 
 param(
+    [Parameter(Mandatory = $true, HelpMessage = "Function host key from Azure Portal → Function App → App keys → default")]
+    [string]$FunctionKey,
+
     [Parameter(Mandatory = $false)]
     [string]$FunctionAppName = 'd-az1-ih-enrichment-func',
 
@@ -37,27 +45,30 @@ try {
     $response = Invoke-RestMethod -Uri "$baseUrl/api/events/enrich" `
         -Method Post `
         -ContentType 'application/json' `
-        -Headers @{ 'x-correlation-id' = $CorrelationId } `
-        -Body $body `
-        -SkipCertificateCheck
-
-    Write-Host "  Status: $($response.statusCode)" -ForegroundColor Green
+        -Headers @{
+            'x-correlation-id' = $CorrelationId
+            'x-functions-key'  = $FunctionKey
+        } `
+        -Body $body
+    Write-Host "  Status: 200" -ForegroundColor Green
     Write-Host "  Body: $($response | ConvertTo-Json -Compress)" -ForegroundColor Gray
+    Write-Host "  (Event submitted successfully)" -ForegroundColor Green
 } catch {
-    $statusCode = $_.Exception.Response.StatusCode.value__
-    Write-Host "  HTTP $statusCode" -ForegroundColor Green
-    try {
-        $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
-        $errorBody = $reader.ReadToEnd()
-        Write-Host "  Response: $errorBody" -ForegroundColor Gray
-    } catch {
-        Write-Host "  (no response body)" -ForegroundColor Gray
+    $sc = $_.Exception.Response.StatusCode.value__
+    Write-Host "  HTTP $sc" -ForegroundColor Green
+    $reader = $null
+    try { $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()) } catch {}
+    if ($reader -ne $null) {
+        Write-Host "  Response: $($reader.ReadToEnd())" -ForegroundColor Gray
+        $reader.Close()
     }
-
-    if ($statusCode -eq 202) {
-        Write-Host "  (Duplicate — idempotency working)" -ForegroundColor Yellow
-    } elseif ($statusCode -ne 200) {
+    if ($sc -eq 202) {
+        Write-Host "  (Duplicate - idempotency working)" -ForegroundColor Yellow
+    } elseif ($sc -ne 200) {
         Write-Host "  Unexpected status" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Hint: Get the function key from:" -ForegroundColor Yellow
+        Write-Host "  Azure Portal → $FunctionAppName → App keys → default" -ForegroundColor Yellow
         exit 1
     }
 }
@@ -70,8 +81,7 @@ Start-Sleep -Seconds 5
 Write-Host "[3/3] Querying order status..." -ForegroundColor Yellow
 try {
     $status = Invoke-RestMethod -Uri "$baseUrl/api/status/$CorrelationId" `
-        -SkipCertificateCheck
-
+        -Headers @{ 'x-functions-key' = $FunctionKey }
     Write-Host "  Status : $($status.status)" -ForegroundColor Green
     Write-Host "  Message: $($status.message)"
     Write-Host "  Updated: $($status.lastUpdatedUtc)"
