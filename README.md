@@ -358,7 +358,52 @@ traces
 
 ---
 
-## Zero-Cost Demo
+## Fresh Deployment Flow
+
+From a brand-new subscription, you can be up and running in ~15 minutes:
+
+### 1. Prerequisites (Azure Portal)
+
+| Step | Where |
+|------|-------|
+| Create App Registration | Microsoft Entra ID → App registrations → New registration (name: `IntegrationHub-Deployment`) |
+| Copy Client ID + Tenant ID | App Registration overview page |
+| Add Federated Credentials | App Registration → Certificates & secrets → Federated credentials → one per GitHub environment (`development`, `integration`, `test`, `uat`, `production`) |
+| Create GitHub secrets | Settings → Secrets and variables → Actions: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` |
+
+### 2. Bootstrap (one-time per subscription)
+
+```bash
+# Login to Azure
+az login
+
+# Run the bootstrap script — registers RPs, creates SP, assigns RBAC, purges old APIM
+./scripts/setup.ps1 -ClientId "YOUR_CLIENT_ID" -SubscriptionId "YOUR_SUBSCRIPTION_ID"
+```
+
+### 3. Deploy
+
+Trigger the pipeline from GitHub Actions → Dev workflow → Run workflow.
+
+Or push to `develop` / `feature/*` — the Dev pipeline auto-triggers.
+
+### 4. Demo
+
+```bash
+# Sends a sample order event and checks processing status
+./scripts/demo.ps1
+```
+
+### Kill Switch
+
+```bash
+# Deletes ALL resources. Run this to verify fresh-deployment works cleanly.
+./scripts/cleanup.ps1 -ResourceGroup d-az1-ih-integration-rg
+```
+
+Then re-run steps 2 → 3 → 4 to verify end-to-end from scratch.
+
+---
 
 Every service tier stays within Azure free limits:
 

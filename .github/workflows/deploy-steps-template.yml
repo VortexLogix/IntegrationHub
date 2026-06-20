@@ -108,6 +108,18 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Register required resource providers
+        run: |
+          for rp in Microsoft.AlertsManagement Microsoft.Storage Microsoft.ApiManagement Microsoft.Web Microsoft.Insights Microsoft.OperationalInsights Microsoft.ServiceBus Microsoft.KeyVault Microsoft.Logic; do
+            state=$(az provider show --namespace "$rp" --query registrationState -o tsv 2>/dev/null)
+            if [ "$state" != "Registered" ]; then
+              echo "Registering $rp..."
+              az provider register --namespace "$rp"
+            else
+              echo "$rp already registered"
+            fi
+          done
+
       - name: Ensure resource group exists
         if: ${{ inputs.deploy_infra }}
         run: |
