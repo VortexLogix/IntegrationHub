@@ -43,7 +43,7 @@ var kvRef = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName='
 // ── Resources ─────────────────────────────────────────────────────────────────
 
 // Consumption plan — scales to zero; free tier compatible (1M executions/month)
-resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
+resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: '${namePrefix}-enrichment-asp'
   location: location
   tags: tags
@@ -57,7 +57,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 }
 
 // Function App — .NET 8 isolated worker
-resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
+resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: '${namePrefix}-enrichment-func'
   location: location
   tags: tags
