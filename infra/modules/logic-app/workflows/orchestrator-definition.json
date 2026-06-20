@@ -8,6 +8,12 @@
       "$connections": {
         "defaultValue": {},
         "type": "Object"
+      },
+      "enrichmentFunctionUrl": {
+        "type": "string"
+      },
+      "notificationWebhookUrl": {
+        "type": "string"
       }
     },
 

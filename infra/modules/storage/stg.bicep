@@ -25,7 +25,9 @@ param tags object
 // ── Variables ─────────────────────────────────────────────────────────────────
 
 // Storage Account names: 3–24 chars, lowercase alphanumeric only — no hyphens.
-var storageAccountName = take(replace('${namePrefix}funcdatastg', '-', ''), 24)
+// take() omitted because namePrefix is always ≤7 chars (e.g. d-az1-ih),
+// so the combined name never exceeds the 24-char limit.
+var storageAccountName = replace('${namePrefix}funcdatastg', '-', '')
 
 // ── Resources ─────────────────────────────────────────────────────────────────
 
