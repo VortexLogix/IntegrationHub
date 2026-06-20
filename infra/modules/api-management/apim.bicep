@@ -48,6 +48,7 @@ resource apim 'Microsoft.ApiManagement/service@2022-08-01' = {
   tags: tags
   sku: {
     name: 'Consumption'   // Serverless; 1M calls/month free
+    capacity: 0
   }
   properties: {
     publisherEmail: publisherEmail
