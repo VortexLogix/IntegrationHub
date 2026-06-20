@@ -148,10 +148,13 @@ jobs:
 
       - name: Deploy Functions
         if: ${{ inputs.deploy_functions && inputs.functions_artifact_name != '' }}
-        uses: Azure/functions-action@v1
-        with:
-          app-name: ${{ inputs.function_app_name }}
-          package: "./publish/functions"
+        run: |
+          cd ./publish/functions
+          zip -r ../functions.zip .
+          az functionapp deployment source config-zip \
+            --resource-group ${{ inputs.resource_group }} \
+            --name ${{ inputs.function_app_name }} \
+            --src ../functions.zip
 
       - name: Download API artifact
         if: ${{ inputs.deploy_api && inputs.api_artifact_name != '' }}
@@ -162,10 +165,13 @@ jobs:
 
       - name: Deploy API
         if: ${{ inputs.deploy_api && inputs.api_artifact_name != '' }}
-        uses: Azure/webapps-deploy@v3
-        with:
-          app-name: ${{ inputs.api_app_name }}
-          package: "./publish/api"
+        run: |
+          cd ./publish/api
+          zip -r ../api.zip .
+          az webapp deployment source config-zip \
+            --resource-group ${{ inputs.resource_group }} \
+            --name ${{ inputs.api_app_name }} \
+            --src ../api.zip
 
       - name: Download frontend artifact
         if: ${{ inputs.deploy_frontend && inputs.frontend_artifact_name != '' }}
