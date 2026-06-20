@@ -155,9 +155,6 @@ resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-01' = 
     <!-- Rate limit: 10 calls per 60 seconds per subscription key -->
     <rate-limit calls="10" renewal-period="60" />
 
-    <!-- Quota: max 500 calls per day per subscription key -->
-    <quota calls="500" renewal-period="86400" />
-
     <!-- Require x-correlation-id header; generate one if absent -->
     <set-header name="x-correlation-id" exists-action="override">
       <value>@((string)context.Variables["correlationId"])</value>
