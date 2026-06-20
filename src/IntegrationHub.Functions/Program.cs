@@ -30,18 +30,18 @@ builder.Services.AddSingleton<BlobServiceClient>(_ =>
 
 builder.Services.AddSingleton<TableServiceClient>(_ =>
 {
-    var accountName = builder.Configuration["AzureWebJobsStorage__accountName"];
-    if (!string.IsNullOrWhiteSpace(accountName))
+    var connectionString = builder.Configuration["AzureWebJobsStorage"];
+    if (!string.IsNullOrWhiteSpace(connectionString))
     {
-        var tableUri = new Uri($"https://{accountName}.table.core.windows.net");
-        return new TableServiceClient(tableUri, new DefaultAzureCredential());
+        return new TableServiceClient(connectionString);
     }
 
-    var connectionString = builder.Configuration["AzureWebJobsStorage"]
+    var accountName = builder.Configuration["AzureWebJobsStorage__accountName"]
         ?? throw new InvalidOperationException(
-            "Neither AzureWebJobsStorage__accountName nor AzureWebJobsStorage is configured.");
+            "Neither AzureWebJobsStorage nor AzureWebJobsStorage__accountName is configured.");
 
-    return new TableServiceClient(connectionString);
+    var tableUri = new Uri($"https://{accountName}.table.core.windows.net");
+    return new TableServiceClient(tableUri, new DefaultAzureCredential());
 });
 
 builder.Services.AddSingleton<IntegrationHub.Functions.Services.IIdempotencyService,
