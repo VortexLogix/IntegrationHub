@@ -10,7 +10,7 @@
 //   - Rate limiting per caller key
 //   - Request/response logging to App Insights
 //
-// Name produced: {namePrefix}-gateway-apim
+// Name produced: {namePrefix}-gw-apim
 // =============================================================================
 
 // ── Parameters ───────────────────────────────────────────────────────────────
@@ -43,7 +43,7 @@ param backendUrl string
 
 // API Management instance — Consumption tier (no infrastructure to manage)
 resource apim 'Microsoft.ApiManagement/service@2022-08-01' = {
-  name: '${namePrefix}-gateway-apim'
+  name: '${namePrefix}-gw-apim'
   location: location
   tags: tags
   sku: {
