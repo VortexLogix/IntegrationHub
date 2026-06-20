@@ -3,7 +3,7 @@
 using '../main.bicep'
 
 param envCode       = 'd'
-param location      = 'centralus'
+param location      = 'eastus'
 param locationCode  = 'az1'
 param projectCode   = 'ih'
 param tags          = {
