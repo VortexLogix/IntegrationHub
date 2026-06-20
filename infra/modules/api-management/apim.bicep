@@ -48,16 +48,10 @@ resource apim 'Microsoft.ApiManagement/service@2022-08-01' = {
   tags: tags
   sku: {
     name: 'Consumption'   // Serverless; 1M calls/month free
-    capacity: 0           // Must be 0 for Consumption tier
   }
   properties: {
     publisherEmail: publisherEmail
     publisherName: publisherName
-    // Managed Identity lets APIM fetch secrets from Key Vault for policies.
-    virtualNetworkType: 'None'
-  }
-  identity: {
-    type: 'SystemAssigned'
   }
 }
 
