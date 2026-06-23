@@ -152,7 +152,7 @@ resource funcKvRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 
 // Function App — Storage Blob Data Contributor (claim-check + idempotency blobs)
 resource funcStorageBlobRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(namePrefix, 'func-stg-blob', storageBlobContribRoleId)
+  name: guid(namePrefix, 'func-stg', storageBlobContribRoleId)
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobContribRoleId)

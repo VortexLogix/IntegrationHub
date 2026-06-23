@@ -42,7 +42,7 @@ var kvRef = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName='
 
 // ── Resources ─────────────────────────────────────────────────────────────────
 
-// Consumption plan — scales to zero; free tier compatible (1M executions/month)
+// Consumption plan — Windows; scales to zero; 1M executions/month free
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: '${namePrefix}-enrichment-asp'
   location: location
@@ -52,16 +52,16 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
     tier: 'Dynamic'
   }
   properties: {
-    reserved: true   // true = Linux (pipeline builds on ubuntu-latest)
+    reserved: false  // false = Windows
   }
 }
 
-// Function App — .NET 8 isolated worker
+// Function App — .NET 10 isolated worker on Windows Consumption
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: '${namePrefix}-enrichment-func'
   location: location
   tags: tags
-  kind: 'functionapp,linux'
+  kind: 'functionapp'   // Windows; 'functionapp,linux' is Linux
 
   // Enable system-assigned Managed Identity so it can read from Key Vault
   // and connect to Service Bus without storing credentials.
@@ -74,16 +74,11 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
     httpsOnly: true    // Force HTTPS — never allow plain HTTP
 
     siteConfig: {
-      // Linux .NET 10 isolated worker
-      linuxFxVersion: 'DOTNET-ISOLATED|10.0'
+      // .NET 10 isolated worker on Windows
+      netFrameworkVersion: 'v10.0'
 
       // App settings — all sensitive values come from Key Vault references.
       appSettings: [
-        {
-          // Run from package — required by Azure/functions-action zip deploy.
-          name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: '1'
-        }
         {
           // Runtime identifier for isolated worker model.
           name: 'FUNCTIONS_WORKER_RUNTIME'
