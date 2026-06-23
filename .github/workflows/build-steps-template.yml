@@ -141,6 +141,7 @@ jobs:
           name: ${{ inputs.functions_artifact_name }}
           path: ./publish/functions
           retention-days: ${{ inputs.artifact_retention_days }}
+          include-hidden-files: true
 
       - name: Setup Node.js
         if: ${{ inputs.build_frontend }}
