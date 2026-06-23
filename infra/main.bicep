@@ -109,7 +109,8 @@ module logicApp 'modules/logic-app/la.bicep' = {
     tags: tags
     appInsightsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
     serviceBusNamespaceName: serviceBus.outputs.namespaceName
-    enrichmentFunctionUrl: enrichmentFunctionUrl
+    // Dynamically fetch the default function key and append it to the URL
+    enrichmentFunctionUrl: '${enrichmentFunctionUrl}?code=${listKeys('${functionApp.outputs.functionAppId}/host/default', '2022-03-01').functionKeys.default}'
     notificationWebhookUrl: notificationWebhookUrl
   }
 }

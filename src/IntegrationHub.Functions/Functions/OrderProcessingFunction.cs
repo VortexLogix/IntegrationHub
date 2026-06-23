@@ -21,7 +21,9 @@ public sealed class OrderProcessingFunction(
         [ServiceBusTrigger("orders", Connection = "ServiceBusConnection")] ServiceBusReceivedMessage message,
         CancellationToken cancellationToken)
     {
-        var correlationId = message.CorrelationId ?? message.MessageId;
+        var correlationId = message.CorrelationId 
+            ?? (message.ApplicationProperties.TryGetValue("correlationId", out var cIdObj) ? cIdObj?.ToString() : null)
+            ?? message.MessageId;
         var sourceSystem = message.ApplicationProperties.TryGetValue("sourceSystem", out var ss) ? ss?.ToString() : null;
 
         logger.LogInformation(

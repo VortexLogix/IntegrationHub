@@ -58,7 +58,7 @@ public sealed class HttpNotificationService : INotificationService
 
     private async Task PostAlertAsync(object payload, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(_webhookUrl))
+        if (string.IsNullOrWhiteSpace(_webhookUrl) || _webhookUrl.StartsWith("@Microsoft.KeyVault"))
         {
             _logger.LogWarning("NotificationWebhookUrl is not configured — alert skipped.");
             return;

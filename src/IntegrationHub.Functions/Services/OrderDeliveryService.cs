@@ -40,7 +40,7 @@ public sealed class OrderDeliveryService(
             cancellationToken).ConfigureAwait(false);
 
         var erpEndpoint = configuration["ErpEndpointUrl"];
-        if (string.IsNullOrWhiteSpace(erpEndpoint))
+        if (string.IsNullOrWhiteSpace(erpEndpoint) || erpEndpoint.StartsWith("@Microsoft.KeyVault"))
         {
             logger.LogWarning("ErpEndpointUrl is not configured. Marking order as completed without ERP call.");
             await idempotencyService.MarkProcessedAsync(deliveryKey, cancellationToken).ConfigureAwait(false);

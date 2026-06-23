@@ -14,7 +14,7 @@ builder.Services.AddHttpClient<IntegrationHub.Functions.Services.INotificationSe
 
 builder.Services.AddSingleton<BlobServiceClient>(_ =>
 {
-    var accountName = builder.Configuration["AzureWebJobsStorage__accountName"];
+    var accountName = Environment.GetEnvironmentVariable("AzureWebJobsStorage__accountName");
     if (!string.IsNullOrWhiteSpace(accountName))
     {
         var blobUri = new Uri($"https://{accountName}.blob.core.windows.net");
@@ -36,7 +36,7 @@ builder.Services.AddSingleton<TableServiceClient>(_ =>
         return new TableServiceClient(connectionString);
     }
 
-    var accountName = builder.Configuration["AzureWebJobsStorage__accountName"]
+    var accountName = Environment.GetEnvironmentVariable("AzureWebJobsStorage__accountName")
         ?? throw new InvalidOperationException(
             "Neither AzureWebJobsStorage nor AzureWebJobsStorage__accountName is configured.");
 
