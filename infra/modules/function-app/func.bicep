@@ -74,10 +74,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
     httpsOnly: true    // Force HTTPS — never allow plain HTTP
 
     siteConfig: {
-      // Linux .NET 10 isolated worker -- matches pipeline (ubuntu-latest).
-      // BUG FIX: Must be 'DOTNET-ISOLATED' not 'DOTNET'. 'DOTNET' is the
-      // in-process model (EOL Sept 2026). Using wrong value causes runtime
-      // version to show as 'Error' and functions to fail loading in the portal.
+      // Linux .NET 10 isolated worker
       linuxFxVersion: 'DOTNET-ISOLATED|10.0'
 
       // App settings — all sensitive values come from Key Vault references.

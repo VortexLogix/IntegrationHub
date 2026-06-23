@@ -50,9 +50,6 @@ resource apim 'Microsoft.ApiManagement/service@2022-08-01' = {
     name: 'Consumption'   // Serverless; 1M calls/month free
     capacity: 0
   }
-  // BUG FIX: System-assigned identity is required so the apimPrincipalId output
-  // can be evaluated. Without this block the 'identity' property does not exist
-  // on the resource and ARM throws DeploymentOutputEvaluationFailed.
   identity: {
     type: 'SystemAssigned'
   }

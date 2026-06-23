@@ -132,10 +132,12 @@ module apiManagement 'modules/api-management/apim.bicep' = {
 // Built-in role IDs are stable GUIDs documented at:
 // https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 
-var kvSecretsUserRoleId     = '4633458b-17de-408a-b874-0445c86b69e6'  // Key Vault Secrets User
-var sbDataReceiverRoleId    = '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'  // Azure Service Bus Data Receiver
-var sbDataSenderRoleId      = '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'  // Azure Service Bus Data Sender
-var storageBlobContribRoleId  = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe' // Storage Blob Data Contributor
+var kvSecretsUserRoleId        = '4633458b-17de-408a-b874-0445c86b69e6'  // Key Vault Secrets User
+var sbDataReceiverRoleId       = '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'  // Azure Service Bus Data Receiver
+var sbDataSenderRoleId         = '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'  // Azure Service Bus Data Sender
+var storageBlobContribRoleId   = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'  // Storage Blob Data Contributor
+var storageQueueContribRoleId  = '974c5e8b-45b9-4653-ba55-5f855dd0fb88'  // Storage Queue Data Contributor
+var storageTableContribRoleId  = '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'  // Storage Table Data Contributor
 
 // Function App — Key Vault Secrets User
 resource funcKvRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
@@ -148,12 +150,34 @@ resource funcKvRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-// Function App — Storage Blob Data Contributor (Managed Identity blob access)
-resource funcStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(namePrefix, 'func-stg', storageBlobContribRoleId)
+// Function App — Storage Blob Data Contributor (claim-check + idempotency blobs)
+resource funcStorageBlobRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(namePrefix, 'func-stg-blob', storageBlobContribRoleId)
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobContribRoleId)
+    principalId: functionApp.outputs.functionAppPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Function App — Storage Queue Data Contributor
+resource funcStorageQueueRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(namePrefix, 'func-stg-queue', storageQueueContribRoleId)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageQueueContribRoleId)
+    principalId: functionApp.outputs.functionAppPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Function App — Storage Table Data Contributor
+resource funcStorageTableRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(namePrefix, 'func-stg-table', storageTableContribRoleId)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageTableContribRoleId)
     principalId: functionApp.outputs.functionAppPrincipalId
     principalType: 'ServicePrincipal'
   }
