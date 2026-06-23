@@ -80,6 +80,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       // App settings — all sensitive values come from Key Vault references.
       appSettings: [
         {
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: '1'
+        }
+        {
           // Runtime identifier for isolated worker model.
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: 'dotnet-isolated'
