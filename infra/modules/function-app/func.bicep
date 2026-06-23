@@ -42,6 +42,11 @@ var kvRef = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName='
 
 // ── Resources ─────────────────────────────────────────────────────────────────
 
+// Reference the existing storage account to retrieve its access keys
+resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' existing = {
+  name: storageAccountName
+}
+
 // Consumption plan — Windows; scales to zero; 1M executions/month free
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: '${namePrefix}-enrichment-asp'
@@ -61,7 +66,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: '${namePrefix}-enrichment-func'
   location: location
   tags: tags
-  kind: 'functionapp'   // Windows; 'functionapp,linux' is Linux
+  kind: 'functionapp'
 
   // Enable system-assigned Managed Identity so it can read from Key Vault
   // and connect to Service Bus without storing credentials.
@@ -79,6 +84,14 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
 
       // App settings — all sensitive values come from Key Vault references.
       appSettings: [
+        {
+          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
+        }
+        {
+          name: 'WEBSITE_CONTENTSHARE'
+          value: toLower('${namePrefix}-enrichment-func-content')
+        }
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
           value: '1'
