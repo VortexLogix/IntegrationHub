@@ -11,7 +11,7 @@ public sealed class StatusFunction(IStatusStore statusStore)
 {
     [Function("StatusFunction")]
     public async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "status/{correlationId}")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "status/{correlationId}")] HttpRequest req,
         string correlationId,
         CancellationToken cancellationToken)
     {

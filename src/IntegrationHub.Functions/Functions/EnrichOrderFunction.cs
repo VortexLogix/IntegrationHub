@@ -19,7 +19,7 @@ public sealed class EnrichOrderFunction(
 
     [Function("EnrichOrderFunction")]
     public async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "events/enrich")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "events/enrich")] HttpRequest req,
         CancellationToken cancellationToken)
     {
         OrderEvent? orderEvent;
