@@ -109,8 +109,9 @@ module logicApp 'modules/logic-app/la.bicep' = {
     tags: tags
     appInsightsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
     serviceBusNamespaceName: serviceBus.outputs.namespaceName
-    // Dynamically fetch the default function key and append it to the URL
-    enrichmentFunctionUrl: '${enrichmentFunctionUrl}?code=${listKeys(resourceId('Microsoft.Web/sites/host', '${namePrefix}-enrichment-func', 'default'), '2022-03-01').functionKeys.default}'
+    // The key is fetched dynamically inside the la.bicep module
+    enrichmentFunctionUrl: enrichmentFunctionUrl
+    functionAppName: '${namePrefix}-enrichment-func'
     notificationWebhookUrl: notificationWebhookUrl
   }
   dependsOn: [
