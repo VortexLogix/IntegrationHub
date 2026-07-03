@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 
 using System.Diagnostics.CodeAnalysis;
 
+using IntegrationHub.Functions.Interfaces;
+
 namespace IntegrationHub.Functions.Services;
 
 [ExcludeFromCodeCoverage]

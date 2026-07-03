@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 
 using System.Diagnostics.CodeAnalysis;
 
+using IntegrationHub.Functions.Interfaces;
+
 namespace IntegrationHub.Functions.Services;
 
 [ExcludeFromCodeCoverage]

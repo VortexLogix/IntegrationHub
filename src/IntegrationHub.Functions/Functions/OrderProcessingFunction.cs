@@ -2,8 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
+using IntegrationHub.Functions.Interfaces;
 using IntegrationHub.Functions.Models;
-using IntegrationHub.Functions.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 

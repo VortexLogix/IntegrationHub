@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using IntegrationHub.Functions.Interfaces;
 using IntegrationHub.Functions.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

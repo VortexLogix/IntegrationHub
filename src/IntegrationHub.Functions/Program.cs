@@ -1,6 +1,8 @@
 using Azure.Data.Tables;
 using Azure.Identity;
 using Azure.Storage.Blobs;
+using IntegrationHub.Functions.Interfaces;
+using IntegrationHub.Functions.Services;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,8 +11,7 @@ var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
 
-builder.Services.AddHttpClient<IntegrationHub.Functions.Services.INotificationService,
-                               IntegrationHub.Functions.Services.HttpNotificationService>();
+builder.Services.AddHttpClient<INotificationService, HttpNotificationService>();
 
 builder.Services.AddSingleton<BlobServiceClient>(_ =>
 {
@@ -44,16 +45,10 @@ builder.Services.AddSingleton<TableServiceClient>(_ =>
     return new TableServiceClient(tableUri, new DefaultAzureCredential());
 });
 
-builder.Services.AddSingleton<IntegrationHub.Functions.Services.IIdempotencyService,
-                               IntegrationHub.Functions.Services.BlobIdempotencyService>();
-builder.Services.AddSingleton<IntegrationHub.Functions.Services.IClaimCheckStore,
-                               IntegrationHub.Functions.Services.BlobClaimCheckStore>();
-builder.Services.AddSingleton<IntegrationHub.Functions.Services.IEnrichmentService,
-                               IntegrationHub.Functions.Services.EnrichmentService>();
-builder.Services.AddSingleton<IntegrationHub.Functions.Services.IStatusStore,
-                               IntegrationHub.Functions.Services.TableStatusStore>();
-builder.Services.AddSingleton<IntegrationHub.Functions.Services.IOrderDeliveryService,
-                               IntegrationHub.Functions.Services.OrderDeliveryService>();
+builder.Services.AddSingleton<IIdempotencyService, BlobIdempotencyService>();
+builder.Services.AddSingleton<IClaimCheckStore, BlobClaimCheckStore>();
+builder.Services.AddSingleton<IEnrichmentService, EnrichmentService>();
+builder.Services.AddSingleton<IStatusStore, TableStatusStore>();
+builder.Services.AddSingleton<IOrderDeliveryService, OrderDeliveryService>();
 
 builder.Build().Run();
-

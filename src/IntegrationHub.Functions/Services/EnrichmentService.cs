@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using IntegrationHub.Functions.Exceptions;
+using IntegrationHub.Functions.Interfaces;
 using IntegrationHub.Functions.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

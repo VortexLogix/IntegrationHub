@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Azure;
 using Azure.Data.Tables;
+using IntegrationHub.Functions.Interfaces;
 using Microsoft.Extensions.Configuration;
 
 namespace IntegrationHub.Functions.Services;

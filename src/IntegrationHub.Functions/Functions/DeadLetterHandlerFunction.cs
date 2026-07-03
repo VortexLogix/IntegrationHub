@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
-using IntegrationHub.Functions.Services;
+using IntegrationHub.Functions.Interfaces;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

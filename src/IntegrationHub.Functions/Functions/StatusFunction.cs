@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using IntegrationHub.Functions.Services;
+using IntegrationHub.Functions.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
