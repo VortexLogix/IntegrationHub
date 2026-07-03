@@ -30,9 +30,6 @@ param serviceBusNamespaceName string
 @description('HTTP endpoint of the enrichment function.')
 param enrichmentFunctionUrl string = 'https://example.invalid/api/events/enrich'
 
-@description('Name of the function app (used to fetch the host key securely).')
-param functionAppName string
-
 @description('Webhook URL used for failure notifications.')
 param notificationWebhookUrl string = 'https://example.invalid/webhook'
 
@@ -50,15 +47,6 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview
 resource serviceBusRootKey 'Microsoft.ServiceBus/namespaces/AuthorizationRules@2022-10-01-preview' existing = {
   parent: serviceBusNamespace
   name: 'RootManageSharedAccessKey'
-}
-
-resource enrichmentFunc 'Microsoft.Web/sites@2022-03-01' existing = {
-  name: functionAppName
-}
-
-resource enrichmentFuncHost 'Microsoft.Web/sites/host@2022-03-01' existing = {
-  parent: enrichmentFunc
-  name: 'default'
 }
 
 // ── Resources ─────────────────────────────────────────────────────────────────
@@ -98,7 +86,7 @@ resource logicApp 'Microsoft.Logic/workflows@2019-05-01' = {
         }
       }
       enrichmentFunctionUrl: {
-        value: '${enrichmentFunctionUrl}?code=${enrichmentFuncHost.listKeys().functionKeys.default}'
+        value: enrichmentFunctionUrl
       }
       notificationWebhookUrl: {
         value: notificationWebhookUrl

@@ -109,9 +109,8 @@ module logicApp 'modules/logic-app/la.bicep' = {
     tags: tags
     appInsightsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
     serviceBusNamespaceName: serviceBus.outputs.namespaceName
-    // The key is fetched dynamically inside the la.bicep module
+    // The key will be securely fetched and injected during the GitHub Actions pipeline
     enrichmentFunctionUrl: enrichmentFunctionUrl
-    functionAppName: '${namePrefix}-enrichment-func'
     notificationWebhookUrl: notificationWebhookUrl
   }
   dependsOn: [

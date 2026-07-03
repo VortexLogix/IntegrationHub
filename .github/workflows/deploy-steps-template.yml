@@ -185,6 +185,19 @@ jobs:
         run: |
           echo "Deploy frontend artifacts from ./publish/frontend (implement specific deployment action)"
 
+      - name: Secure Logic App Connection
+        if: ${{ inputs.deploy_functions && inputs.deploy_infra && inputs.function_app_name != '' }}
+        run: |
+          echo "Fetching function key..."
+          FUNC_KEY=$(az rest --method post --uri "https://management.azure.com/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ inputs.resource_group }}/providers/Microsoft.Web/sites/${{ inputs.function_app_name }}/host/default/listKeys?api-version=2022-03-01" --query functionKeys.default -o tsv)
+          
+          echo "Updating Logic App..."
+          az deployment group create \
+            --resource-group ${{ inputs.resource_group }} \
+            --template-file ./infra/main.bicep \
+            --parameters ${{ inputs.bicep_param_file }} \
+            --parameters enrichmentFunctionUrl="https://${{ inputs.function_app_name }}.azurewebsites.net/api/events/enrich?code=$FUNC_KEY"
+
       - name: Smoke test
         if: ${{ inputs.smoke_test_apim_url != '' }}
         run: |
