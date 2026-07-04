@@ -19,42 +19,14 @@ on:
         required: false
         type: string
         default: "Release"
-      build_functions:
-        required: false
-        type: boolean
-        default: true
-      build_api:
-        required: false
-        type: boolean
-        default: false
-      build_frontend:
-        required: false
-        type: boolean
-        default: false
       publish_project:
         required: false
         type: string
         default: "src/IntegrationHub.Functions/IntegrationHub.Functions.csproj"
-      api_publish_project:
-        required: false
-        type: string
-        default: "src/IntegrationHub.Api/IntegrationHub.Api.csproj"
       functions_artifact_name:
         required: false
         type: string
         default: "functions-build"
-      api_artifact_name:
-        required: false
-        type: string
-        default: "api-build"
-      frontend_artifact_name:
-        required: false
-        type: string
-        default: "frontend-build"
-      node_version:
-        required: false
-        type: string
-        default: '18'
       artifact_retention_days:
         required: false
         type: number
@@ -89,15 +61,12 @@ jobs:
           restore-keys: nuget-${{ runner.os }}-
 
       - name: Restore dependencies
-        if: ${{ inputs.build_functions || inputs.build_api }}
         run: dotnet restore ${{ inputs.solution }}
 
-      - name: Build (.NET) (${{ inputs.configuration }})
-        if: ${{ inputs.build_functions || inputs.build_api }}
+      - name: Build (${{ inputs.configuration }})
         run: dotnet build ${{ inputs.solution }} --no-restore --configuration ${{ inputs.configuration }}
 
       - name: Run unit tests
-        if: ${{ inputs.build_functions || inputs.build_api }}
         run: |
           dotnet test ${{ inputs.solution }} \
             --no-build \
@@ -106,7 +75,7 @@ jobs:
             --logger "trx;LogFileName=test-results.trx"
 
       - name: Run coverage gate
-        if: ${{ (inputs.build_functions || inputs.build_api) && inputs.enforce_coverage }}
+        if: ${{ inputs.enforce_coverage }}
         run: |
           dotnet test ${{ inputs.solution }} \
             --no-build \
@@ -126,7 +95,6 @@ jobs:
           retention-days: ${{ inputs.artifact_retention_days }}
 
       - name: Publish Function App
-        if: ${{ inputs.build_functions }}
         run: |
           dotnet publish \
             ${{ inputs.publish_project }} \
@@ -135,51 +103,9 @@ jobs:
             --output ./publish/functions
 
       - name: Upload Function App artifact
-        if: ${{ inputs.build_functions }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.functions_artifact_name }}
           path: ./publish/functions
           retention-days: ${{ inputs.artifact_retention_days }}
           include-hidden-files: true
-
-      - name: Setup Node.js
-        if: ${{ inputs.build_frontend }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ inputs.node_version }}
-
-      - name: Install frontend dependencies
-        if: ${{ inputs.build_frontend }}
-        run: npm ci
-        working-directory: src/frontend
-
-      - name: Build frontend
-        if: ${{ inputs.build_frontend }}
-        run: npm run build
-        working-directory: src/frontend
-
-      - name: Upload frontend artifact
-        if: ${{ inputs.build_frontend }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ inputs.frontend_artifact_name }}
-          path: src/frontend/dist
-          retention-days: ${{ inputs.artifact_retention_days }}
-
-      - name: Publish API (optional)
-        if: ${{ inputs.build_api }}
-        run: |
-          dotnet publish \
-            ${{ inputs.api_publish_project }} \
-            --no-restore \
-            --configuration ${{ inputs.configuration }} \
-            --output ./publish/api
-
-      - name: Upload API artifact
-        if: ${{ inputs.build_api }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ inputs.api_artifact_name }}
-          path: ./publish/api
-          retention-days: ${{ inputs.artifact_retention_days }}

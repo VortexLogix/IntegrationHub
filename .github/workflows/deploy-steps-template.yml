@@ -25,18 +25,6 @@ on:
         required: false
         type: string
         default: ""
-      api_app_name:
-        required: false
-        type: string
-        default: ""
-      api_artifact_name:
-        required: false
-        type: string
-        default: ""
-      frontend_artifact_name:
-        required: false
-        type: string
-        default: ""
       azure_location:
         required: false
         type: string
@@ -46,22 +34,6 @@ on:
         type: boolean
         default: true
       deploy_functions:
-        required: false
-        type: boolean
-        default: true
-      deploy_api:
-        required: false
-        type: boolean
-        default: false
-      deploy_frontend:
-        required: false
-        type: boolean
-        default: false
-      smoke_test_apim_url:
-        required: false
-        type: string
-        default: ""
-      smoke_test_continue_on_error:
         required: false
         type: boolean
         default: true
@@ -80,8 +52,6 @@ on:
         required: true
       AZURE_SUBSCRIPTION_ID:
         required: true
-      APIM_SUBSCRIPTION_KEY:
-        required: false
 
 jobs:
   deploy:
