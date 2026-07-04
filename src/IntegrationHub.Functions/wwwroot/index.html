@@ -703,16 +703,28 @@
 
     <main>
       <!-- Config bar -->
-      <div class="config-bar">
-        <label>🔧 Functions Host URL</label>
-        <input
-          class="config-input"
-          id="host-url"
-          type="text"
-          placeholder="http://localhost:7071"
-          title="Change this to your deployed Azure Function App URL"
-        />
-        <span class="config-hint">Tip: change this to your Azure Function App URL for live demos</span>
+      <div class="config-bar" style="grid-column: 1 / -1; display: flex; gap: 1.5rem; align-items: flex-start; background: var(--card); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border);">
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">🔧 Host URL (APIM or Function App)</label>
+          <input
+            class="config-input form-input"
+            id="host-url"
+            type="text"
+            placeholder="https://d-az1-ih-gw-apim.azure-api.net"
+            title="Change this to your deployed Azure APIM URL or Function App URL"
+          />
+          <span class="config-hint" style="font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem;">Tip: Use the APIM Gateway URL for true end-to-end testing</span>
+        </div>
+
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">🔑 APIM Subscription Key (Optional)</label>
+          <input
+            class="config-input form-input"
+            id="sub-key"
+            type="password"
+            placeholder="Leave blank if testing locally or directly against Function App"
+          />
+        </div>
       </div>
 
       <!-- Metrics -->
@@ -957,10 +969,16 @@
       respBox.className = 'response-box visible';
       respBox.textContent = 'Calling EnrichOrderFunction…';
 
+      const subKey = document.getElementById('sub-key')?.value.trim();
+      const headers = { 'Content-Type': 'application/json', 'x-correlation-id': evtId };
+      if (subKey) {
+        headers['Ocp-Apim-Subscription-Key'] = subKey;
+      }
+
       try {
         const res = await fetch(`${getBase()}/api/events/enrich`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-correlation-id': evtId },
+          headers: headers,
           body: JSON.stringify(payload)
         });
 
