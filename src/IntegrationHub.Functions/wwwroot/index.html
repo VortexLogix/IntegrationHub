@@ -363,18 +363,17 @@
 
     /* ── Send Order form ── */
     .send-panel {
-      grid-column: 2 / 3;
-      grid-row: 2 / 5;
-      background: var(--card);
+      position: sticky;
+      top: calc(64px + 1.25rem);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 1.5rem;
       height: fit-content;
-      position: sticky;
-      top: 80px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
     .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -708,10 +707,9 @@
         <label>🔧 Functions Host URL</label>
         <input
           class="config-input"
-          id="base-url-input"
+          id="host-url"
           type="text"
-          value="http://localhost:7071"
-          placeholder="http://localhost:7071  or  https://d-az1-ih-enrichment-func.azurewebsites.net"
+          placeholder="http://localhost:7071"
           title="Change this to your deployed Azure Function App URL"
         />
         <span class="config-hint">Tip: change this to your Azure Function App URL for live demos</span>
@@ -875,15 +873,48 @@
 
   <script>
     // ── State ──────────────────────────────────────────────────────────────
-    const trackedOrders = new Map(); // correlationId → { status, sourceSystem, eventType, lastUpdatedUtc, message }
+    let trackedOrders = new Map();
+
+    // Init defaults dynamically based on hosting environment
+    document.addEventListener('DOMContentLoaded', async () => {
+      const defaultUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://localhost:7071' 
+        : window.location.origin;
+      
+      document.getElementById('host-url').value = defaultUrl;
+      await fetchHistory();
+    });
+
+    async function fetchHistory() {
+      try {
+        const res = await fetch(`${getBase()}/api/status/recent`);
+        if (res.ok) {
+          const arr = await res.json();
+          arr.reverse().forEach(data => {
+            trackedOrders.set(data.correlationId, {
+              status: data.status,
+              sourceSystem: data.sourceSystem,
+              eventType: data.eventType,
+              lastUpdatedUtc: data.lastUpdatedUtc,
+              message: data.message
+            });
+          });
+          renderFeed();
+          updateMetrics();
+        }
+      } catch (err) {
+        console.warn('Could not fetch history:', err);
+      }
+    }
+
+    function getBase() {
+      return (document.getElementById('host-url').value || 'http://localhost:7071').replace(/\/$/, '');
+    }
+
     let autoRefresh = true;
     let refreshTimer = null;
     const REFRESH_INTERVAL = 8000;
 
-    // ── Base URL ────────────────────────────────────────────────────────────
-    function getBase() {
-      return (document.getElementById('base-url-input').value || 'http://localhost:7071').replace(/\/$/, '');
-    }
 
     // ── Auto-refresh toggle ──────────────────────────────────────────────
     document.getElementById('refresh-toggle').addEventListener('click', () => {

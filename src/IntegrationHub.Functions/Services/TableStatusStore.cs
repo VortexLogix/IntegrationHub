@@ -68,4 +68,36 @@ public sealed class TableStatusStore : IStatusStore
 
         return null;
     }
+    public async Task<IReadOnlyList<OrderStatusEntity>> GetRecentOrdersAsync(int limit = 50, CancellationToken cancellationToken = default)
+    {
+        var results = new List<OrderStatusEntity>();
+        try
+        {
+            // Table Storage doesn't support server-side sorting by custom properties easily without an index,
+            // but we can query everything and sort client-side for this small demo, OR we can just fetch all and take the latest.
+            // A better production approach is using a tick-based RowKey, but for the demo we'll fetch up to 1000 and sort.
+            var entities = _tableClient.QueryAsync<TableEntity>(maxPerPage: 100, cancellationToken: cancellationToken);
+            
+            await foreach (var entity in entities.ConfigureAwait(false))
+            {
+                results.Add(new OrderStatusEntity
+                {
+                    PartitionKey = entity.PartitionKey,
+                    RowKey = entity.RowKey,
+                    Status = entity.GetString("Status") ?? string.Empty,
+                    Message = entity.GetString("Message") ?? string.Empty,
+                    SourceSystem = entity.GetString("SourceSystem") ?? string.Empty,
+                    EventType = entity.GetString("EventType") ?? string.Empty,
+                    LastUpdatedUtc = entity.GetDateTimeOffset("LastUpdatedUtc") ?? DateTimeOffset.UtcNow,
+                    Timestamp = entity.Timestamp
+                });
+            }
+        }
+        catch (RequestFailedException)
+        {
+            // Table doesn't exist or other error
+        }
+
+        return results.OrderByDescending(x => x.LastUpdatedUtc).Take(limit).ToList();
+    }
 }

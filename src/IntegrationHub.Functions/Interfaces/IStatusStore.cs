@@ -16,4 +16,5 @@ public interface IStatusStore
 {
     Task SetStatusAsync(string correlationId, string sourceSystem, string status, string message, string eventType, CancellationToken cancellationToken);
     Task<OrderStatusEntity?> GetStatusAsync(string correlationId, string? sourceSystem = null, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<OrderStatusEntity>> GetRecentOrdersAsync(int limit = 50, CancellationToken cancellationToken = default);
 }

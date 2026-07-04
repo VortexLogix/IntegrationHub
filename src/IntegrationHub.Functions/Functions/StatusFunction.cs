@@ -45,4 +45,28 @@ public sealed class StatusFunction(IStatusStore statusStore)
             lastUpdatedUtc = entity.LastUpdatedUtc
         });
     }
+    [Function("RecentStatusFunction")]
+    public async Task<IActionResult> RunRecent(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "status/recent")] HttpRequest req,
+        CancellationToken cancellationToken)
+    {
+        var limitStr = req.Query["limit"].FirstOrDefault();
+        int limit = 50;
+        if (int.TryParse(limitStr, out int parsed) && parsed > 0)
+        {
+            limit = Math.Min(parsed, 100);
+        }
+
+        var entities = await statusStore.GetRecentOrdersAsync(limit, cancellationToken).ConfigureAwait(false);
+
+        return new OkObjectResult(entities.Select(entity => new
+        {
+            correlationId = entity.RowKey,
+            status = entity.Status,
+            message = entity.Message,
+            sourceSystem = entity.SourceSystem,
+            eventType = entity.EventType,
+            lastUpdatedUtc = entity.LastUpdatedUtc
+        }));
+    }
 }

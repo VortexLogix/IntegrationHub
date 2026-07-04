@@ -42,4 +42,12 @@ public sealed class InMemoryStatusStore : IStatusStore
             : Latest(correlationId);
         return Task.FromResult(entity);
     }
+    public Task<IReadOnlyList<OrderStatusEntity>> GetRecentOrdersAsync(int limit = 50, CancellationToken cancellationToken = default)
+    {
+        var recent = AllWrites
+            .OrderByDescending(x => x.LastUpdatedUtc)
+            .Take(limit)
+            .ToList();
+        return Task.FromResult<IReadOnlyList<OrderStatusEntity>>(recent);
+    }
 }
