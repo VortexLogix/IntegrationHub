@@ -2,19 +2,22 @@
   <inbound>
     <base />
     
-    <!-- Extract the base URL and Path+Query from the injected Logic App Webhook URL -->
-    <set-variable name="logicAppBaseUrl" value="@{
-        var url = new Uri(&quot;__BACKEND_URL__&quot;);
-        return url.Scheme + &quot;://&quot; + url.Host;
-    }" />
-    <set-variable name="logicAppPathAndQuery" value="@{
-        var url = new Uri(&quot;__BACKEND_URL__&quot;);
+    <!-- Securely fetch the Named Value containing the SAS URL -->
+    <set-variable name="fullBackendUrl" value="{{logicAppBackendUrl}}" />
+
+    <!-- Safely parse it using native C# without string interpolation bugs -->
+    <set-variable name="logicAppBaseUrl" value='@{
+        var url = new Uri((string)context.Variables["fullBackendUrl"]);
+        return url.Scheme + "://" + url.Host;
+    }' />
+    <set-variable name="logicAppPathAndQuery" value='@{
+        var url = new Uri((string)context.Variables["fullBackendUrl"]);
         return url.PathAndQuery;
-    }" />
+    }' />
 
     <!-- Forward to Logic App webhook -->
-    <set-backend-service base-url="@((string)context.Variables[&quot;logicAppBaseUrl&quot;])" />
-    <rewrite-uri template="@((string)context.Variables[&quot;logicAppPathAndQuery&quot;])" />
+    <set-backend-service base-url='@((string)context.Variables["logicAppBaseUrl"])' />
+    <rewrite-uri template='@((string)context.Variables["logicAppPathAndQuery"])' />
   </inbound>
   <backend>
     <base />

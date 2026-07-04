@@ -152,14 +152,28 @@ resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-01' = 
   }
 }
 
+// ── Named Values (Secure Backend Storage) ───────────────────────────────────────
+resource logicAppUrlNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = {
+  parent: apim
+  name: 'logicAppBackendUrl'
+  properties: {
+    displayName: 'logicAppBackendUrl'
+    value: backendUrl
+    secret: true
+  }
+}
+
 // ── Operation-level policy: Backend Routing ───────────────────────────────────
 resource postEventsPolicy 'Microsoft.ApiManagement/service/apis/operations/policies@2022-08-01' = {
   parent: postEventsOperation
   name: 'policy'
   properties: {
     format: 'rawxml'
-    value: replace(loadTextContent('policies/post-events-policy.xml'), '__BACKEND_URL__', replace(backendUrl, '&', '&amp;'))
+    value: loadTextContent('policies/post-events-policy.xml')
   }
+  dependsOn: [
+    logicAppUrlNamedValue
+  ]
 }
 
 

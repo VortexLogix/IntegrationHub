@@ -2,7 +2,7 @@
   <inbound>
     <base />
 
-    <set-variable name="correlationId" value="@((string)context.Request.Headers.GetValueOrDefault(&quot;x-correlation-id&quot;, Guid.NewGuid().ToString()))" />
+    <set-variable name="correlationId" value='@((string)context.Request.Headers.GetValueOrDefault("x-correlation-id", Guid.NewGuid().ToString()))' />
 
     <!-- Rate limit: 10 calls per 60 seconds per subscription key -->
     <rate-limit calls="10" renewal-period="60" />
