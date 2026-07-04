@@ -148,53 +148,7 @@ resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-01' = 
   name: 'policy'
   properties: {
     format: 'rawxml'
-    value: replace('''
-<policies>
-  <inbound>
-    <base />
-
-    <set-variable name="correlationId" value="@((string)context.Request.Headers.GetValueOrDefault(&quot;x-correlation-id&quot;, Guid.NewGuid().ToString()))" />
-
-    <!-- Rate limit: 10 calls per 60 seconds per subscription key -->
-    <rate-limit calls="10" renewal-period="60" />
-
-    <!-- Require x-correlation-id header; generate one if absent -->
-    <set-header name="x-correlation-id" exists-action="override">
-      <value>@((string)context.Variables["correlationId"])</value>
-    </set-header>
-
-    <!-- Forward correlation ID header to backend is handled by base if needed -->
-  </inbound>
-
-  <backend>
-    <base />
-  </backend>
-
-  <outbound>
-    <base />
-    <!-- Expose correlation ID in response so callers can trace their request -->
-    <set-header name="x-correlation-id" exists-action="override">
-      <value>@((string)context.Variables["correlationId"])</value>
-    </set-header>
-  </outbound>
-
-  <on-error>
-    <base />
-    <return-response>
-      <set-status code="500" reason="Internal Server Error" />
-      <set-header name="Content-Type" exists-action="override">
-        <value>application/json</value>
-      </set-header>
-      <set-body>@{
-        return new JObject(
-          new JProperty("error", context.LastError.Message),
-          new JProperty("correlationId", context.RequestId)
-        ).ToString();
-      }</set-body>
-    </return-response>
-  </on-error>
-</policies>
-'''
+    value: loadTextContent('policies/api-policy.xml')
   }
 }
 
@@ -204,36 +158,7 @@ resource postEventsPolicy 'Microsoft.ApiManagement/service/apis/operations/polic
   name: 'policy'
   properties: {
     format: 'rawxml'
-    value: replace('''
-<policies>
-  <inbound>
-    <base />
-    
-    <!-- Extract the base URL and Path+Query from the injected Logic App Webhook URL -->
-    <set-variable name="logicAppBaseUrl" value="@{
-        var url = new Uri(&quot;__BACKEND_URL__&quot;);
-        return url.Scheme + &quot;://&quot; + url.Host;
-    }" />
-    <set-variable name="logicAppPathAndQuery" value="@{
-        var url = new Uri(&quot;__BACKEND_URL__&quot;);
-        return url.PathAndQuery;
-    }" />
-
-    <!-- Forward to Logic App webhook -->
-    <set-backend-service base-url="@((string)context.Variables[&quot;logicAppBaseUrl&quot;])" />
-    <rewrite-uri template="@((string)context.Variables[&quot;logicAppPathAndQuery&quot;])" />
-  </inbound>
-  <backend>
-    <base />
-  </backend>
-  <outbound>
-    <base />
-  </outbound>
-  <on-error>
-    <base />
-  </on-error>
-</policies>
-''', '__BACKEND_URL__', backendUrl)
+    value: replace(loadTextContent('policies/post-events-policy.xml'), '__BACKEND_URL__', backendUrl)
   }
 }
 
