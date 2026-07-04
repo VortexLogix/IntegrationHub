@@ -158,7 +158,7 @@ resource postEventsPolicy 'Microsoft.ApiManagement/service/apis/operations/polic
   name: 'policy'
   properties: {
     format: 'rawxml'
-    value: replace(loadTextContent('policies/post-events-policy.xml'), '__BACKEND_URL__', backendUrl)
+    value: replace(loadTextContent('policies/post-events-policy.xml'), '__BACKEND_URL__', replace(backendUrl, '&', '&amp;'))
   }
 }
 
