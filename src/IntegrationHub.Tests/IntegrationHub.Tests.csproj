@@ -9,7 +9,7 @@
 
   <!-- Coverage: enforce 60% on business logic, infrastructure excluded via [ExcludeFromCodeCoverage] -->
   <PropertyGroup>
-    <ExcludeByFile>**/Program.cs</ExcludeByFile>
+    <ExcludeByFile>**/Program.cs,**/obj/**/*.g.cs</ExcludeByFile>
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
