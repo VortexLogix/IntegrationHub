@@ -14,4 +14,3 @@ param tags          = {
 }
 param enrichmentFunctionUrl = 'https://p-az1-ih-enrichment-func.azurewebsites.net/api/events/enrich'
 param notificationWebhookUrl = 'https://p-az1-ih-enrichment-func.azurewebsites.net/api/notifications/failure'
-param apimBackendUrl = 'https://p-az1-ih-enrichment-func.azurewebsites.net'

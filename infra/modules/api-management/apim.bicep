@@ -163,9 +163,7 @@ resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-01' = 
       <value>@((string)context.Variables["correlationId"])</value>
     </set-header>
 
-    <!-- Forward correlation ID to backend -->
-    <set-backend-service base-url="__BACKEND_URL__" />
-    <rewrite-uri template="/api/events/enrich" />
+    <!-- Forward correlation ID header to backend is handled by base if needed -->
   </inbound>
 
   <backend>
@@ -196,9 +194,49 @@ resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-01' = 
     </return-response>
   </on-error>
 </policies>
+'''
+  }
+}
+
+// ── Operation-level policy: Backend Routing ───────────────────────────────────
+resource postEventsPolicy 'Microsoft.ApiManagement/service/apis/operations/policies@2022-08-01' = {
+  parent: postEventsOperation
+  name: 'policy'
+  properties: {
+    format: 'rawxml'
+    value: replace('''
+<policies>
+  <inbound>
+    <base />
+    
+    <!-- Extract the base URL and Path+Query from the injected Logic App Webhook URL -->
+    <set-variable name="logicAppBaseUrl" value="@{
+        var url = new Uri(&quot;__BACKEND_URL__&quot;);
+        return url.Scheme + &quot;://&quot; + url.Host;
+    }" />
+    <set-variable name="logicAppPathAndQuery" value="@{
+        var url = new Uri(&quot;__BACKEND_URL__&quot;);
+        return url.PathAndQuery;
+    }" />
+
+    <!-- Forward to Logic App webhook -->
+    <set-backend-service base-url="@((string)context.Variables[&quot;logicAppBaseUrl&quot;])" />
+    <rewrite-uri template="@((string)context.Variables[&quot;logicAppPathAndQuery&quot;])" />
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>
 ''', '__BACKEND_URL__', backendUrl)
   }
 }
+
 
 // ── Outputs ───────────────────────────────────────────────────────────────────
 

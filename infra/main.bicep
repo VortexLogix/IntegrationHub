@@ -39,8 +39,6 @@ param enrichmentFunctionUrl string = 'https://example.invalid/api/events/enrich'
 @description('Webhook endpoint used by Logic App for failure notifications.')
 param notificationWebhookUrl string = 'https://example.invalid/webhook'
 
-@description('Backend base URL used by APIM policy forwarding.')
-param apimBackendUrl string = 'https://example.invalid'
 
 // ── Shared name prefix ────────────────────────────────────────────────────────
 // Every module derives resource names from this prefix so naming stays consistent.
@@ -127,8 +125,11 @@ module apiManagement 'modules/api-management/apim.bicep' = {
     tags: tags
     appInsightsResourceId: monitoring.outputs.appInsightsResourceId
     appInsightsInstrumentationKey: monitoring.outputs.appInsightsInstrumentationKey
-    backendUrl: apimBackendUrl
+    backendUrl: listCallbackUrl(resourceId('Microsoft.Logic/workflows/triggers', logicApp.outputs.logicAppName, 'When_an_HTTP_request_is_received'), '2019-05-01').value
   }
+  dependsOn: [
+    logicApp
+  ]
 }
 
 // ── RBAC Role Assignments ─────────────────────────────────────────────────────
