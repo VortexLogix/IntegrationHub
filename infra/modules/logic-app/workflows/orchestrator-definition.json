@@ -10,10 +10,10 @@
         "type": "Object"
       },
       "enrichmentFunctionUrl": {
-        "type": "string"
+        "type": "String"
       },
       "notificationWebhookUrl": {
-        "type": "string"
+        "type": "String"
       }
     },
 
@@ -77,7 +77,7 @@
           },
           "body": "@triggerBody()",
           "retryPolicy": {
-            "type": "fixed",
+            "type": "Fixed",
             "count": 3,
             "interval": "PT10S"
           }
@@ -201,13 +201,13 @@
 
   "parameters": {
     "enrichmentFunctionUrl": {
-      "type": "string",
+      "type": "String",
       "metadata": {
         "description": "HTTP trigger URL of the EnrichOrderFunction (pulled from Key Vault at deploy time)."
       }
     },
     "notificationWebhookUrl": {
-      "type": "string",
+      "type": "String",
       "metadata": {
         "description": "Webhook URL for failure alerts (Slack / Teams / custom)."
       }

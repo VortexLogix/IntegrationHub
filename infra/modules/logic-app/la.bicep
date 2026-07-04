@@ -149,7 +149,7 @@ resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-pr
 // ── Outputs ───────────────────────────────────────────────────────────────────
 
 @description('Logic App name.')
-output logicAppName string = logicApp.name
+output logicAppName string = '${namePrefix}-orchestrator-la'
 
 @description('Resource ID of the Logic App.')
 output logicAppId string = logicApp.id
