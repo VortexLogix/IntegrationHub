@@ -204,6 +204,42 @@ public sealed class EnrichmentServiceTests
         Assert.Equal(0, claimStore.SaveCalls);
     }
 
+    // ── Missing Coverage Validation Tests ─────────────────────────────────────
+
+    [Fact]
+    public async Task EnrichAsync_NullPayload_ThrowsValidationException()
+    {
+        var service = CreateService(new InMemoryIdempotencyService(), new FakeClaimCheckStore(), 65536);
+        
+        // Payload left as Undefined (not provided in JSON)
+        var json = """{"eventId": "test-1", "eventType": "OrderCreated", "sourceSystem": "CRM"}""";
+        var orderEvent = System.Text.Json.JsonSerializer.Deserialize<OrderEvent>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        
+        var ex = await Assert.ThrowsAsync<ValidationException>(() => service.EnrichAsync(orderEvent!, "corr-1", CancellationToken.None));
+        Assert.Equal("payload is required.", ex.Message);
+    }
+
+    [Fact]
+    public async Task EnrichAsync_EmptyStringPayloadValue_ThrowsValidationException()
+    {
+        var service = CreateService(new InMemoryIdempotencyService(), new FakeClaimCheckStore(), 65536);
+        var orderEvent = CreateOrderEvent("test-2", "   ", 1); // empty string productCode
+        
+        var ex = await Assert.ThrowsAsync<ValidationException>(() => service.EnrichAsync(orderEvent, "corr-2", CancellationToken.None));
+        Assert.Equal("payload.productCode is required.", ex.Message);
+    }
+
+    [Fact]
+    public async Task EnrichAsync_InvalidIntPayloadValue_ThrowsValidationException()
+    {
+        var service = CreateService(new InMemoryIdempotencyService(), new FakeClaimCheckStore(), 65536);
+        var json = """{"eventId": "test-3", "eventType": "OrderCreated", "sourceSystem": "CRM", "payload": {"productCode": "SKU-1", "quantity": "NOT_A_NUMBER"}}""";
+        var orderEvent = System.Text.Json.JsonSerializer.Deserialize<OrderEvent>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        
+        var ex = await Assert.ThrowsAsync<ValidationException>(() => service.EnrichAsync(orderEvent!, "corr-3", CancellationToken.None));
+        Assert.Equal("payload.quantity must be a valid number.", ex.Message);
+    }
+
     // ── Notification service ──────────────────────────────────────────────────
 
     [Fact]
