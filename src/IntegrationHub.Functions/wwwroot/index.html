@@ -1170,14 +1170,8 @@
     // ── State ──────────────────────────────────────────────────────────────
     let trackedOrders = new Map();
 
-    // Init defaults dynamically based on hosting environment
     document.addEventListener('DOMContentLoaded', async () => {
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        document.getElementById('host-url').value = 'http://localhost:7071';
-        document.getElementById('func-url').value = 'http://localhost:7071';
-      } else {
-        document.getElementById('func-url').value = window.location.origin;
-      }
+      document.getElementById('func-url').value = window.location.origin;
       await fetchHistory();
     });
 
@@ -1256,6 +1250,17 @@
       btn.disabled = true;
       btn.textContent = '⏳ Sending…';
       respBox.className = 'response-box visible';
+
+      const apimUrl = document.getElementById('host-url').value.trim();
+      if (!apimUrl) {
+        respBox.className = 'response-box visible error';
+        respBox.textContent = 'APIM Gateway URL is not set.\n\nPaste your APIM URL into the \"APIM Gateway URL\" field above.\nExample: https://d-az1-ih-gw-apim.azure-api.net';
+        toast('Enter the APIM Gateway URL first', 'error');
+        btn.disabled = false;
+        btn.textContent = '⚡ Send Order Event';
+        return;
+      }
+
       respBox.textContent = 'Sending to APIM → Logic App…';
 
       const subKey = document.getElementById('sub-key')?.value.trim();
@@ -1300,8 +1305,8 @@
         }
       } catch (err) {
         respBox.className = 'response-box visible error';
-        respBox.textContent = `Network error: ${err.message}\n\nMake sure the Functions host is running at:\n${getBase()}`;
-        toast('Could not reach Functions host — see response box', 'error');
+        respBox.textContent = `Network error: ${err.message}\n\nTarget URL: ${getBase()}/api/events\n\nCheck:\n• APIM Gateway URL is correct\n• APIM subscription key is valid\n• CORS is configured on APIM`;
+        toast('Network error — see response box', 'error');
       }
 
       btn.disabled = false;
