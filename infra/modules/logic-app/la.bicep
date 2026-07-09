@@ -157,3 +157,9 @@ output logicAppId string = logicApp.id
 @description('Principal ID of the Logic App Managed Identity.')
 output logicAppPrincipalId string = logicApp.identity.principalId
 
+@description('HTTP trigger callback URL — evaluated here so the resource is guaranteed to exist.')
+output httpTriggerCallbackUrl string = listCallbackUrl(
+  resourceId('Microsoft.Logic/workflows/triggers', logicApp.name, 'When_an_HTTP_request_is_received'),
+  '2019-05-01'
+).value
+

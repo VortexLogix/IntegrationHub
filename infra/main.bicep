@@ -125,11 +125,8 @@ module apiManagement 'modules/api-management/apim.bicep' = {
     tags: tags
     appInsightsResourceId: monitoring.outputs.appInsightsResourceId
     appInsightsInstrumentationKey: monitoring.outputs.appInsightsInstrumentationKey
-    backendUrl: listCallbackUrl(resourceId('Microsoft.Logic/workflows/triggers', '${namePrefix}-orchestrator-la', 'When_an_HTTP_request_is_received'), '2019-05-01').value
+    backendUrl: logicApp.outputs.httpTriggerCallbackUrl
   }
-  dependsOn: [
-    logicApp
-  ]
 }
 
 // ── RBAC Role Assignments ─────────────────────────────────────────────────────
