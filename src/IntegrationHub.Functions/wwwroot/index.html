@@ -1,33 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IntegrationHub — Live Monitor</title>
-  <meta name="description" content="Real-time order integration pipeline monitor for IntegrationHub — Azure Functions, Service Bus, APIM." />
+  <meta name="description"
+    content="Real-time order integration pipeline monitor for IntegrationHub — Azure Functions, Service Bus, APIM." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:       #080e1a;
-      --surface:  #0d1526;
-      --card:     #111d35;
-      --border:   rgba(99,132,255,0.15);
-      --text:     #e2e8f0;
-      --muted:    #64748b;
-      --accent:   #6384ff;
-      --blue:     #3b82f6;
-      --green:    #22c55e;
-      --amber:    #f59e0b;
-      --red:      #ef4444;
-      --purple:   #a855f7;
-      --cyan:     #06b6d4;
-      --glow:     0 0 20px rgba(99,132,255,0.3);
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html { scroll-behavior: smooth; }
+    :root {
+      --bg: #080e1a;
+      --surface: #0d1526;
+      --card: #111d35;
+      --border: rgba(99, 132, 255, 0.15);
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --accent: #6384ff;
+      --blue: #3b82f6;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --purple: #a855f7;
+      --cyan: #06b6d4;
+      --glow: 0 0 20px rgba(99, 132, 255, 0.3);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       background: var(--bg);
@@ -42,15 +55,21 @@
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(99,132,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(99,132,255,0.03) 1px, transparent 1px);
+        linear-gradient(rgba(99, 132, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 132, 255, 0.03) 1px, transparent 1px);
       background-size: 40px 40px;
       pointer-events: none;
       z-index: 0;
     }
 
     /* ── Layout ── */
-    .app { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .app {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
     /* ── Header ── */
     header {
@@ -59,7 +78,7 @@
       justify-content: space-between;
       padding: 0 2rem;
       height: 64px;
-      background: rgba(13,21,38,0.9);
+      background: rgba(13, 21, 38, 0.9);
       border-bottom: 1px solid var(--border);
       backdrop-filter: blur(12px);
       position: sticky;
@@ -85,20 +104,26 @@
       align-items: center;
       justify-content: center;
       font-size: 1.1rem;
-      box-shadow: 0 0 16px rgba(99,132,255,0.4);
+      box-shadow: 0 0 16px rgba(99, 132, 255, 0.4);
     }
 
-    .logo-text span { color: var(--accent); }
+    .logo-text span {
+      color: var(--accent);
+    }
 
-    .header-right { display: flex; align-items: center; gap: 1.5rem; }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
 
     .status-badge {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       padding: 0.35rem 0.85rem;
-      background: rgba(34,197,94,0.1);
-      border: 1px solid rgba(34,197,94,0.3);
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
       border-radius: 999px;
       font-size: 0.8rem;
       font-weight: 600;
@@ -114,8 +139,17 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.6; transform: scale(0.85); }
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.6;
+        transform: scale(0.85);
+      }
     }
 
     .auto-refresh-toggle {
@@ -138,7 +172,9 @@
       cursor: pointer;
     }
 
-    .toggle-switch.on { background: var(--accent); }
+    .toggle-switch.on {
+      background: var(--accent);
+    }
 
     .toggle-switch::after {
       content: '';
@@ -152,7 +188,9 @@
       transition: transform 0.2s;
     }
 
-    .toggle-switch.on::after { transform: translateX(16px); }
+    .toggle-switch.on::after {
+      transform: translateX(16px);
+    }
 
     main {
       flex: 1;
@@ -170,12 +208,15 @@
       main {
         grid-template-columns: 1fr;
       }
+
       .send-panel {
         grid-column: 1 / 2 !important;
         grid-row: auto !important;
         position: static;
       }
-      .pipeline-section, .feed-section {
+
+      .pipeline-section,
+      .feed-section {
         grid-column: 1 / 2;
       }
     }
@@ -189,7 +230,9 @@
     }
 
     @media (max-width: 900px) {
-      .metrics-row { grid-template-columns: repeat(2, 1fr); }
+      .metrics-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .metric-card {
@@ -202,7 +245,10 @@
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .metric-card:hover { transform: translateY(-2px); box-shadow: var(--glow); }
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow);
+    }
 
     .metric-card::before {
       content: '';
@@ -216,10 +262,21 @@
       transform: translate(20px, -20px);
     }
 
-    .metric-card.total::before  { background: var(--accent); }
-    .metric-card.done::before   { background: var(--green); }
-    .metric-card.proc::before   { background: var(--amber); }
-    .metric-card.fail::before   { background: var(--red); }
+    .metric-card.total::before {
+      background: var(--accent);
+    }
+
+    .metric-card.done::before {
+      background: var(--green);
+    }
+
+    .metric-card.proc::before {
+      background: var(--amber);
+    }
+
+    .metric-card.fail::before {
+      background: var(--red);
+    }
 
     .metric-label {
       font-size: 0.78rem;
@@ -239,10 +296,21 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .metric-card.total .metric-value { color: var(--accent); }
-    .metric-card.done  .metric-value { color: var(--green); }
-    .metric-card.proc  .metric-value { color: var(--amber); }
-    .metric-card.fail  .metric-value { color: var(--red); }
+    .metric-card.total .metric-value {
+      color: var(--accent);
+    }
+
+    .metric-card.done .metric-value {
+      color: var(--green);
+    }
+
+    .metric-card.proc .metric-value {
+      color: var(--amber);
+    }
+
+    .metric-card.fail .metric-value {
+      color: var(--red);
+    }
 
     .metric-sub {
       font-size: 0.78rem;
@@ -311,18 +379,61 @@
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .pipe-box:hover { transform: scale(1.05); }
+    .pipe-box:hover {
+      transform: scale(1.05);
+    }
 
-    .pipe-box .pipe-icon { font-size: 1.1rem; }
+    .pipe-box .pipe-icon {
+      font-size: 1.1rem;
+    }
 
-    .pipe-box.crm       { background: rgba(168,85,247,0.12); border-color: rgba(168,85,247,0.4); color: var(--purple); }
-    .pipe-box.apim      { background: rgba(6,182,212,0.12);  border-color: rgba(6,182,212,0.4);  color: var(--cyan);   }
-    .pipe-box.logic     { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.4); color: var(--amber);  }
-    .pipe-box.func      { background: rgba(99,132,255,0.12); border-color: rgba(99,132,255,0.4); color: var(--accent); }
-    .pipe-box.bus       { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.4); color: var(--blue);   }
-    .pipe-box.proc      { background: rgba(99,132,255,0.12); border-color: rgba(99,132,255,0.4); color: var(--accent); }
-    .pipe-box.erp       { background: rgba(34,197,94,0.12);  border-color: rgba(34,197,94,0.4);  color: var(--green);  }
-    .pipe-box.storage   { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.4); color: var(--amber);  }
+    .pipe-box.crm {
+      background: rgba(168, 85, 247, 0.12);
+      border-color: rgba(168, 85, 247, 0.4);
+      color: var(--purple);
+    }
+
+    .pipe-box.apim {
+      background: rgba(6, 182, 212, 0.12);
+      border-color: rgba(6, 182, 212, 0.4);
+      color: var(--cyan);
+    }
+
+    .pipe-box.logic {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.4);
+      color: var(--amber);
+    }
+
+    .pipe-box.func {
+      background: rgba(99, 132, 255, 0.12);
+      border-color: rgba(99, 132, 255, 0.4);
+      color: var(--accent);
+    }
+
+    .pipe-box.bus {
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.4);
+      color: var(--blue);
+    }
+
+    .pipe-box.proc {
+      background: rgba(99, 132, 255, 0.12);
+      border-color: rgba(99, 132, 255, 0.4);
+      color: var(--accent);
+    }
+
+    .pipe-box.erp {
+      background: rgba(34, 197, 94, 0.12);
+      border-color: rgba(34, 197, 94, 0.4);
+      color: var(--green);
+    }
+
+    .pipe-box.storage {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.4);
+      color: var(--amber);
+    }
 
     .pipe-label {
       font-size: 0.65rem;
@@ -343,14 +454,19 @@
     .pipe-arrow-line {
       width: 28px;
       height: 2px;
-      background: linear-gradient(90deg, var(--accent), rgba(99,132,255,0.3));
+      background: linear-gradient(90deg, var(--accent), rgba(99, 132, 255, 0.3));
       position: relative;
       animation: flow 1.5s linear infinite;
     }
 
     @keyframes flow {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
+      0% {
+        background-position: 0% 50%;
+      }
+
+      100% {
+        background-position: 100% 50%;
+      }
     }
 
     .pipe-arrow-head {
@@ -358,7 +474,7 @@
       height: 0;
       border-top: 5px solid transparent;
       border-bottom: 5px solid transparent;
-      border-left: 6px solid rgba(99,132,255,0.5);
+      border-left: 6px solid rgba(99, 132, 255, 0.5);
     }
 
     /* ── Send Order form ── */
@@ -375,10 +491,14 @@
       flex-direction: column;
       gap: 1.5rem;
       height: fit-content;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
 
-    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
 
     .form-label {
       font-size: 0.78rem;
@@ -388,7 +508,8 @@
       letter-spacing: 0.06em;
     }
 
-    .form-input, .form-select {
+    .form-input,
+    .form-select {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -402,9 +523,10 @@
       appearance: none;
     }
 
-    .form-input:focus, .form-select:focus {
+    .form-input:focus,
+    .form-select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(99,132,255,0.15);
+      box-shadow: 0 0 0 3px rgba(99, 132, 255, 0.15);
     }
 
     .form-select {
@@ -432,12 +554,22 @@
       font-weight: 700;
       cursor: pointer;
       transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
-      box-shadow: 0 4px 20px rgba(99,132,255,0.3);
+      box-shadow: 0 4px 20px rgba(99, 132, 255, 0.3);
     }
 
-    .btn-submit:hover { opacity: 0.9; box-shadow: 0 6px 28px rgba(99,132,255,0.45); }
-    .btn-submit:active { transform: scale(0.98); }
-    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-submit:hover {
+      opacity: 0.9;
+      box-shadow: 0 6px 28px rgba(99, 132, 255, 0.45);
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
     .response-box {
       background: var(--surface);
@@ -455,8 +587,13 @@
       display: none;
     }
 
-    .response-box.error { color: var(--red); }
-    .response-box.visible { display: block; }
+    .response-box.error {
+      color: var(--red);
+    }
+
+    .response-box.visible {
+      display: block;
+    }
 
     .divider {
       height: 1px;
@@ -469,12 +606,14 @@
       gap: 0.5rem;
     }
 
-    .lookup-row .form-input { flex: 1; }
+    .lookup-row .form-input {
+      flex: 1;
+    }
 
     .btn-lookup {
       padding: 0.65rem 1rem;
-      background: rgba(99,132,255,0.15);
-      border: 1px solid rgba(99,132,255,0.3);
+      background: rgba(99, 132, 255, 0.15);
+      border: 1px solid rgba(99, 132, 255, 0.3);
       border-radius: 10px;
       color: var(--accent);
       font-family: 'Inter', sans-serif;
@@ -485,7 +624,9 @@
       transition: background 0.2s;
     }
 
-    .btn-lookup:hover { background: rgba(99,132,255,0.25); }
+    .btn-lookup:hover {
+      background: rgba(99, 132, 255, 0.25);
+    }
 
     /* ── Order feed ── */
     .feed-section {
@@ -519,9 +660,20 @@
       transition: all 0.2s;
     }
 
-    .btn-refresh:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-refresh.spinning svg { animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-refresh:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-refresh.spinning svg {
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
     table {
       width: 100%;
@@ -541,16 +693,28 @@
     }
 
     tbody tr {
-      border-bottom: 1px solid rgba(99,132,255,0.06);
+      border-bottom: 1px solid rgba(99, 132, 255, 0.06);
       transition: background 0.15s;
     }
 
-    tbody tr:hover { background: rgba(99,132,255,0.05); }
-    tbody tr.new-row { animation: fadeIn 0.4s ease; }
+    tbody tr:hover {
+      background: rgba(99, 132, 255, 0.05);
+    }
+
+    tbody tr.new-row {
+      animation: fadeIn 0.4s ease;
+    }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     td {
@@ -582,17 +746,48 @@
       border-radius: 50%;
     }
 
-    .badge.completed   { background: rgba(34,197,94,0.12);  color: var(--green);  }
-    .badge.processing  { background: rgba(245,158,11,0.12); color: var(--amber);  }
-    .badge.failed      { background: rgba(239,68,68,0.12);  color: var(--red);    }
-    .badge.unknown     { background: rgba(100,116,139,0.12);color: var(--muted);  }
+    .badge.completed {
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--green);
+    }
 
-    .badge.completed  .badge-dot { background: var(--green); animation: pulse 2s infinite; }
-    .badge.processing .badge-dot { background: var(--amber); animation: pulse 1s infinite; }
-    .badge.failed     .badge-dot { background: var(--red); }
-    .badge.unknown    .badge-dot { background: var(--muted); }
+    .badge.processing {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--amber);
+    }
 
-    .time-ago { font-size: 0.78rem; color: var(--muted); }
+    .badge.failed {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--red);
+    }
+
+    .badge.unknown {
+      background: rgba(100, 116, 139, 0.12);
+      color: var(--muted);
+    }
+
+    .badge.completed .badge-dot {
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    .badge.processing .badge-dot {
+      background: var(--amber);
+      animation: pulse 1s infinite;
+    }
+
+    .badge.failed .badge-dot {
+      background: var(--red);
+    }
+
+    .badge.unknown .badge-dot {
+      background: var(--muted);
+    }
+
+    .time-ago {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
 
     /* ── Empty state ── */
     .empty-state {
@@ -606,8 +801,14 @@
       text-align: center;
     }
 
-    .empty-state .empty-icon { font-size: 2.5rem; opacity: 0.3; }
-    .empty-state p { font-size: 0.85rem; }
+    .empty-state .empty-icon {
+      font-size: 2.5rem;
+      opacity: 0.3;
+    }
+
+    .empty-state p {
+      font-size: 0.85rem;
+    }
 
     /* ── Toast ── */
     #toast-container {
@@ -632,19 +833,40 @@
     }
 
     @keyframes slideUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .toast.success { background: rgba(34,197,94,0.15);  border-color: rgba(34,197,94,0.3);  color: var(--green); }
-    .toast.error   { background: rgba(239,68,68,0.15);  border-color: rgba(239,68,68,0.3);  color: var(--red);   }
-    .toast.info    { background: rgba(99,132,255,0.15); border-color: rgba(99,132,255,0.3); color: var(--accent);}
+    .toast.success {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.3);
+      color: var(--green);
+    }
+
+    .toast.error {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--red);
+    }
+
+    .toast.info {
+      background: rgba(99, 132, 255, 0.15);
+      border-color: rgba(99, 132, 255, 0.3);
+      color: var(--accent);
+    }
 
     /* ── Config panel ── */
     .config-bar {
       grid-column: 1 / -1;
-      background: rgba(13,21,38,0.7);
-      border: 1px solid rgba(99,132,255,0.08);
+      background: rgba(13, 21, 38, 0.7);
+      border: 1px solid rgba(99, 132, 255, 0.08);
       border-radius: 12px;
       padding: 0.75rem 1.25rem;
       display: flex;
@@ -654,7 +876,11 @@
       flex-wrap: wrap;
     }
 
-    .config-bar label { color: var(--muted); font-weight: 600; white-space: nowrap; }
+    .config-bar label {
+      color: var(--muted);
+      font-weight: 600;
+      white-space: nowrap;
+    }
 
     .config-input {
       flex: 1;
@@ -669,7 +895,9 @@
       outline: none;
     }
 
-    .config-input:focus { border-color: var(--accent); }
+    .config-input:focus {
+      border-color: var(--accent);
+    }
 
     .config-hint {
       color: var(--muted);
@@ -678,11 +906,22 @@
     }
 
     /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
   </style>
 </head>
+
 <body>
   <div class="app">
     <!-- Header -->
@@ -705,27 +944,31 @@
 
     <main>
       <!-- Config bar -->
-      <div class="config-bar" style="grid-column: 1 / -1; display: flex; gap: 1.5rem; align-items: flex-start; background: var(--card); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border);">
+      <div class="config-bar"
+        style="grid-column: 1 / -1; display: flex; gap: 1.5rem; align-items: flex-start; background: var(--card); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border);">
         <div class="form-group" style="flex: 1;">
-          <label class="form-label">🔧 Host URL (APIM or Function App)</label>
-          <input
-            class="config-input form-input"
-            id="host-url"
-            type="text"
-            placeholder="https://d-az1-ih-gw-apim.azure-api.net"
-            title="Change this to your deployed Azure APIM URL or Function App URL"
-          />
-          <span class="config-hint" style="font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem;">Tip: Use the APIM Gateway URL for true end-to-end testing</span>
+          <label class="form-label">🛡️ APIM Gateway URL <span style="color:var(--red);font-size:0.7rem">(send
+              orders)</span></label>
+          <input class="config-input form-input" id="host-url" type="text"
+            placeholder="https://d-az1-ih-gw-apim.azure-api.net" title="APIM Gateway URL — used for POST /api/events" />
+          <span class="config-hint" style="font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem;">Orders go:
+            APIM → Logic App → Enrich → Service Bus</span>
+        </div>
+
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Function App URL <span style="color:var(--cyan);font-size:0.7rem">(status
+              checks)</span></label>
+          <input class="config-input form-input" id="func-url" type="text"
+            placeholder="https://d-az1-ih-enrichment-func.azurewebsites.net"
+            title="Function App host — used for GET /api/status/* (not behind APIM)" />
+          <span class="config-hint" style="font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem;">Status API is
+            on the Function App</span>
         </div>
 
         <div class="form-group" style="flex: 1;">
           <label class="form-label">🔑 APIM Subscription Key (Optional)</label>
-          <input
-            class="config-input form-input"
-            id="sub-key"
-            type="password"
-            placeholder="Leave blank if testing locally or directly against Function App"
-          />
+          <input class="config-input form-input" id="sub-key" type="password"
+            placeholder="Leave blank if testing locally or directly against Function App" />
         </div>
       </div>
 
@@ -762,49 +1005,86 @@
         <div class="section-title">🔗 Integration Pipeline</div>
         <div class="pipeline-flow">
           <div class="pipe-node">
-            <div class="pipe-box crm"><div class="pipe-icon">🏢</div>CRM</div>
+            <div class="pipe-box crm">
+              <div class="pipe-icon">🏢</div>CRM
+            </div>
             <div class="pipe-label">External Caller</div>
           </div>
-          <div class="pipe-arrow"><div class="pipe-arrow-line"></div><div class="pipe-arrow-head"></div></div>
+          <div class="pipe-arrow">
+            <div class="pipe-arrow-line"></div>
+            <div class="pipe-arrow-head"></div>
+          </div>
 
           <div class="pipe-node">
-            <div class="pipe-box apim"><div class="pipe-icon">🛡️</div>APIM</div>
+            <div class="pipe-box apim">
+              <div class="pipe-icon">🛡️</div>APIM
+            </div>
             <div class="pipe-label">Rate-limit 10/60s</div>
           </div>
-          <div class="pipe-arrow"><div class="pipe-arrow-line"></div><div class="pipe-arrow-head"></div></div>
+          <div class="pipe-arrow">
+            <div class="pipe-arrow-line"></div>
+            <div class="pipe-arrow-head"></div>
+          </div>
 
           <div class="pipe-node">
-            <div class="pipe-box logic"><div class="pipe-icon">🔄</div>Logic App</div>
+            <div class="pipe-box logic">
+              <div class="pipe-icon">🔄</div>Logic App
+            </div>
             <div class="pipe-label">Schema validate + route</div>
           </div>
-          <div class="pipe-arrow"><div class="pipe-arrow-line"></div><div class="pipe-arrow-head"></div></div>
+          <div class="pipe-arrow">
+            <div class="pipe-arrow-line"></div>
+            <div class="pipe-arrow-head"></div>
+          </div>
 
           <div class="pipe-node">
-            <div class="pipe-box func"><div class="pipe-icon">⚡</div>Enrich Fn</div>
+            <div class="pipe-box func">
+              <div class="pipe-icon">⚡</div>Enrich Fn
+            </div>
             <div class="pipe-label">Idempotency + enrich</div>
           </div>
-          <div class="pipe-arrow"><div class="pipe-arrow-line"></div><div class="pipe-arrow-head"></div></div>
+          <div class="pipe-arrow">
+            <div class="pipe-arrow-line"></div>
+            <div class="pipe-arrow-head"></div>
+          </div>
 
           <div class="pipe-node">
-            <div class="pipe-box bus"><div class="pipe-icon">📨</div>Service Bus</div>
+            <div class="pipe-box bus">
+              <div class="pipe-icon">📨</div>Service Bus
+            </div>
             <div class="pipe-label">orders queue (DLQ x3)</div>
           </div>
-          <div class="pipe-arrow"><div class="pipe-arrow-line"></div><div class="pipe-arrow-head"></div></div>
+          <div class="pipe-arrow">
+            <div class="pipe-arrow-line"></div>
+            <div class="pipe-arrow-head"></div>
+          </div>
 
           <div class="pipe-node">
-            <div class="pipe-box proc"><div class="pipe-icon">⚙️</div>Order Proc</div>
+            <div class="pipe-box proc">
+              <div class="pipe-icon">⚙️</div>Order Proc
+            </div>
             <div class="pipe-label">Deliver to ERP</div>
           </div>
-          <div class="pipe-arrow"><div class="pipe-arrow-line"></div><div class="pipe-arrow-head"></div></div>
+          <div class="pipe-arrow">
+            <div class="pipe-arrow-line"></div>
+            <div class="pipe-arrow-head"></div>
+          </div>
 
           <div class="pipe-node">
-            <div class="pipe-box erp"><div class="pipe-icon">🏭</div>ERP</div>
+            <div class="pipe-box erp">
+              <div class="pipe-icon">🏭</div>ERP
+            </div>
             <div class="pipe-label">Mock / Real endpoint</div>
           </div>
-          <div class="pipe-arrow"><div class="pipe-arrow-line"></div><div class="pipe-arrow-head"></div></div>
+          <div class="pipe-arrow">
+            <div class="pipe-arrow-line"></div>
+            <div class="pipe-arrow-head"></div>
+          </div>
 
           <div class="pipe-node">
-            <div class="pipe-box storage"><div class="pipe-icon">🗄️</div>Table Store</div>
+            <div class="pipe-box storage">
+              <div class="pipe-icon">🗄️</div>Table Store
+            </div>
             <div class="pipe-label">Status tracking</div>
           </div>
         </div>
@@ -866,8 +1146,9 @@
         <div class="feed-header">
           <div class="section-title" style="margin:0">📋 Live Order Feed</div>
           <button class="btn-refresh" id="refresh-btn" onclick="refreshFeed(true)">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5" />
             </svg>
             Refresh
           </button>
@@ -876,7 +1157,7 @@
         <div id="feed-container">
           <div class="empty-state">
             <div class="empty-icon">📭</div>
-            <p>No orders tracked yet.<br/>Send a test order or enter a Correlation ID to look up status.</p>
+            <p>No orders tracked yet.<br />Send a test order or enter a Correlation ID to look up status.</p>
           </div>
         </div>
       </div>
@@ -891,17 +1172,17 @@
 
     // Init defaults dynamically based on hosting environment
     document.addEventListener('DOMContentLoaded', async () => {
-      const defaultUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-        ? 'http://localhost:7071' 
+      const defaultUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:7071'
         : window.location.origin;
-      
+
       document.getElementById('host-url').value = defaultUrl;
       await fetchHistory();
     });
 
     async function fetchHistory() {
       try {
-        const res = await fetch(`${getBase()}/api/status/recent`);
+        const res = await fetch(`${getFuncBase()}/api/status/recent`);
         if (res.ok) {
           const arr = await res.json();
           arr.reverse().forEach(data => {
@@ -923,6 +1204,11 @@
 
     function getBase() {
       return (document.getElementById('host-url').value || 'http://localhost:7071').replace(/\/$/, '');
+    }
+
+    function getFuncBase() {
+      const funcUrl = document.getElementById('func-url')?.value.trim();
+      return (funcUrl || document.getElementById('host-url').value || 'http://localhost:7071').replace(/\/$/, '');
     }
 
     let autoRefresh = true;
@@ -963,13 +1249,13 @@
         eventId: evtId,
         eventType: 'OrderCreated',
         sourceSystem,
-        payload: { productCode, quantity, customerId: `cust-${Math.floor(Math.random()*1000)}` }
+        payload: { productCode, quantity, customerId: `cust-${Math.floor(Math.random() * 1000)}` }
       };
 
       btn.disabled = true;
       btn.textContent = '⏳ Sending…';
       respBox.className = 'response-box visible';
-      respBox.textContent = 'Calling EnrichOrderFunction…';
+      respBox.textContent = 'Sending to APIM → Logic App…';
 
       const subKey = document.getElementById('sub-key')?.value.trim();
       const headers = { 'Content-Type': 'application/json', 'x-correlation-id': evtId };
@@ -978,7 +1264,7 @@
       }
 
       try {
-        const res = await fetch(`${getBase()}/api/events/enrich`, {
+        const res = await fetch(`${getBase()}/api/events`, {
           method: 'POST',
           headers: headers,
           body: JSON.stringify(payload)
@@ -999,7 +1285,7 @@
             sourceSystem,
             eventType: 'OrderCreated',
             lastUpdatedUtc: new Date().toISOString(),
-            message: 'Enrichment accepted, awaiting Service Bus processing'
+            message: 'Logic App accepted, awaiting Service Bus processing'
           });
           document.getElementById('lookup-id').value = evtId;
           renderFeed();
@@ -1031,7 +1317,7 @@
     async function fetchStatus(correlationId, showInBox = false) {
       const respBox = document.getElementById('lookup-response');
       try {
-        const res = await fetch(`${getBase()}/api/status/${encodeURIComponent(correlationId)}`);
+        const res = await fetch(`${getFuncBase()}/api/status/${encodeURIComponent(correlationId)}`);
         const text = await res.text();
         let data;
         try { data = JSON.parse(text); } catch { data = null; }
@@ -1062,7 +1348,7 @@
             respBox.textContent = `HTTP ${res.status}\n${text}`;
           }
         }
-      } catch(err) {
+      } catch (err) {
         if (showInBox) {
           respBox.className = 'response-box visible error';
           respBox.textContent = `Network error: ${err.message}`;
@@ -1098,7 +1384,7 @@
         return `
           <tr class="new-row">
             <td>
-              <div class="correlation-id" title="${id}">${id.length > 24 ? id.substring(0,22)+'…' : id}</div>
+              <div class="correlation-id" title="${id}">${id.length > 24 ? id.substring(0, 22) + '…' : id}</div>
               <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">${order.message || ''}</div>
             </td>
             <td><span style="font-size:0.82rem">${order.sourceSystem || '—'}</span></td>
@@ -1131,9 +1417,9 @@
     function updateMetrics() {
       const orders = [...trackedOrders.values()];
       const total = orders.length;
-      const completed  = orders.filter(o => (o.status||'').toLowerCase() === 'completed').length;
-      const processing = orders.filter(o => (o.status||'').toLowerCase() === 'processing').length;
-      const failed     = orders.filter(o => (o.status||'').toLowerCase() === 'failed').length;
+      const completed = orders.filter(o => (o.status || '').toLowerCase() === 'completed').length;
+      const processing = orders.filter(o => (o.status || '').toLowerCase() === 'processing').length;
+      const failed = orders.filter(o => (o.status || '').toLowerCase() === 'failed').length;
 
       animateCount('m-total', total);
       animateCount('m-completed', completed);
@@ -1151,10 +1437,10 @@
     // ── Utilities ────────────────────────────────────────────────────────
     function timeAgo(isoStr) {
       const diff = (Date.now() - new Date(isoStr)) / 1000;
-      if (diff < 5)   return 'just now';
-      if (diff < 60)  return `${Math.floor(diff)}s ago`;
-      if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
-      return `${Math.floor(diff/3600)}h ago`;
+      if (diff < 5) return 'just now';
+      if (diff < 60) return `${Math.floor(diff)}s ago`;
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      return `${Math.floor(diff / 3600)}h ago`;
     }
 
     function toast(message, type = 'info') {
@@ -1176,7 +1462,8 @@
     startAutoRefresh();
 
     // Pre-populate a demo correlation ID hint
-    document.getElementById('evt-id').placeholder = `demo-${new Date().toISOString().slice(0,10)}-001`;
+    document.getElementById('evt-id').placeholder = `demo-${new Date().toISOString().slice(0, 10)}-001`;
   </script>
 </body>
+
 </html>
