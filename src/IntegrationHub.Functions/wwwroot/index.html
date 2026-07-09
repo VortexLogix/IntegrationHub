@@ -1172,11 +1172,12 @@
 
     // Init defaults dynamically based on hosting environment
     document.addEventListener('DOMContentLoaded', async () => {
-      const defaultUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://localhost:7071'
-        : window.location.origin;
-
-      document.getElementById('host-url').value = defaultUrl;
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        document.getElementById('host-url').value = 'http://localhost:7071';
+        document.getElementById('func-url').value = 'http://localhost:7071';
+      } else {
+        document.getElementById('func-url').value = window.location.origin;
+      }
       await fetchHistory();
     });
 
