@@ -1,0 +1,17 @@
+<policies>
+  <inbound>
+    <base />
+    <!-- Route GET /api/status/{correlationId} directly to the Function App -->
+    <set-backend-service base-url="{{functionAppBaseUrl}}" />
+    <rewrite-uri template="/api/status/{correlationId}" copy-unmatched-params="true" />
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

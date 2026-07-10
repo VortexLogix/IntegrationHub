@@ -33,16 +33,16 @@ param tags object = {
   managedBy: 'Bicep'
 }
 
-@description('HTTP endpoint for the enrichment function consumed by Logic App.')
-param enrichmentFunctionUrl string = 'https://example.invalid/api/events/enrich'
-
-@description('Webhook endpoint used by Logic App for failure notifications.')
-param notificationWebhookUrl string = 'https://example.invalid/webhook'
+@description('Webhook endpoint used by Logic App for failure notifications. Leave empty to disable alerting.')
+param notificationWebhookUrl string = ''
 
 
 // ── Shared name prefix ────────────────────────────────────────────────────────
 // Every module derives resource names from this prefix so naming stays consistent.
 var namePrefix = '${envCode}-${locationCode}-${projectCode}'
+
+// Derived from naming convention
+var enrichmentFunctionUrl = 'https://${namePrefix}-enrichment-func.azurewebsites.net/api/events/enrich'
 
 // ── Module: Monitoring (deploy first — others need the workspace resource ID) ─
 module monitoring 'modules/monitoring/monitoring.bicep' = {
@@ -126,6 +126,7 @@ module apiManagement 'modules/api-management/apim.bicep' = {
     appInsightsResourceId: monitoring.outputs.appInsightsResourceId
     appInsightsInstrumentationKey: monitoring.outputs.appInsightsInstrumentationKey
     backendUrl: logicApp.outputs.httpTriggerCallbackUrl
+    functionAppUrl: 'https://${namePrefix}-enrichment-func.azurewebsites.net'
   }
 }
 

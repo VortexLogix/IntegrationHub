@@ -36,8 +36,11 @@ param publisherEmail string = 'admin@integrationhub.dev'
 @description('Publisher name shown in the developer portal.')
 param publisherName string = 'Integration Hub Team'
 
-@description('Backend base URL APIM forwards requests to.')
+@description('Logic App backend URL (HTTP Trigger)')
 param backendUrl string
+
+@description('Function App base URL')
+param functionAppUrl string
 
 // ── Resources ─────────────────────────────────────────────────────────────────
 
@@ -173,6 +176,74 @@ resource postEventsPolicy 'Microsoft.ApiManagement/service/apis/operations/polic
   }
   dependsOn: [
     logicAppUrlNamedValue
+  ]
+}
+
+// ── Named Value: Function App base URL ───────────────────────────────────────
+resource functionAppUrlNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = {
+  parent: apim
+  name: 'functionAppBaseUrl'
+  properties: {
+    displayName: 'functionAppBaseUrl'
+    value: functionAppUrl
+    secret: false
+  }
+}
+
+// ── GET /status/{correlationId} operation ─────────────────────────────────────
+resource getStatusOperation 'Microsoft.ApiManagement/service/apis/operations@2022-08-01' = {
+  parent: integrationHubApi
+  name: 'get-status'
+  properties: {
+    displayName: 'Get Order Status'
+    method: 'GET'
+    urlTemplate: '/status/{correlationId}'
+    description: 'Returns the current processing status of an order by correlation ID.'
+    templateParameters: [
+      {
+        name: 'correlationId'
+        description: 'The correlation ID returned when the order was submitted.'
+        type: 'string'
+        required: true
+      }
+    ]
+    request: {
+      description: 'Optionally filter by source system'
+      queryParameters: [
+        {
+          name: 'sourceSystem'
+          description: 'Source system name (e.g. CRM). Improves query performance by avoiding a cross-partition scan.'
+          type: 'string'
+          required: false
+          values: []
+        }
+      ]
+      headers: []
+      representations: []
+    }
+    responses: [
+      {
+        statusCode: 200
+        description: 'Order status found'
+      }
+      {
+        statusCode: 404
+        description: 'No status record found for this correlation ID'
+      }
+    ]
+  }
+}
+
+// ── Operation policy: route GET /status to Function App ───────────────────────
+resource getStatusPolicy 'Microsoft.ApiManagement/service/apis/operations/policies@2022-08-01' = {
+  parent: getStatusOperation
+  name: 'policy'
+  properties: {
+    format: 'rawxml'
+    value: loadTextContent('policies/get-status-policy.xml')
+  }
+  dependsOn: [
+    functionAppUrlNamedValue
   ]
 }
 

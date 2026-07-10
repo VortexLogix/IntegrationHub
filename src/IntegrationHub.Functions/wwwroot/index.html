@@ -946,29 +946,17 @@
       <!-- Config bar -->
       <div class="config-bar"
         style="grid-column: 1 / -1; display: flex; gap: 1.5rem; align-items: flex-start; background: var(--card); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border);">
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label">🛡️ APIM Gateway URL <span style="color:var(--red);font-size:0.7rem">(send
-              orders)</span></label>
+        <div class="form-group" style="flex: 2;">
+          <label class="form-label">🛡️ APIM Gateway URL</label>
           <input class="config-input form-input" id="host-url" type="text"
-            placeholder="https://d-az1-ih-gw-apim.azure-api.net" title="APIM Gateway URL — used for POST /api/events" />
-          <span class="config-hint" style="font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem;">Orders go:
-            APIM → Logic App → Enrich → Service Bus</span>
+            placeholder="https://d-az1-ih-gw-apim.azure-api.net"
+            title="All traffic goes through APIM: POST /api/events and GET /api/status/{id}" />
+          <span class="config-hint" style="font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem;">Used for both sending orders and checking status</span>
         </div>
-
         <div class="form-group" style="flex: 1;">
-          <label class="form-label">Function App URL <span style="color:var(--cyan);font-size:0.7rem">(status
-              checks)</span></label>
-          <input class="config-input form-input" id="func-url" type="text"
-            placeholder="https://d-az1-ih-enrichment-func.azurewebsites.net"
-            title="Function App host — used for GET /api/status/* (not behind APIM)" />
-          <span class="config-hint" style="font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem;">Status API is
-            on the Function App</span>
-        </div>
-
-        <div class="form-group" style="flex: 1;">
-          <label class="form-label">🔑 APIM Subscription Key (Optional)</label>
+          <label class="form-label">🔑 Subscription Key (Optional)</label>
           <input class="config-input form-input" id="sub-key" type="password"
-            placeholder="Leave blank if testing locally or directly against Function App" />
+            placeholder="Ocp-Apim-Subscription-Key" />
         </div>
       </div>
 
@@ -1170,40 +1158,15 @@
     // ── State ──────────────────────────────────────────────────────────────
     let trackedOrders = new Map();
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      document.getElementById('func-url').value = window.location.origin;
-      await fetchHistory();
-    });
-
-    async function fetchHistory() {
-      try {
-        const res = await fetch(`${getFuncBase()}/api/status/recent`);
-        if (res.ok) {
-          const arr = await res.json();
-          arr.reverse().forEach(data => {
-            trackedOrders.set(data.correlationId, {
-              status: data.status,
-              sourceSystem: data.sourceSystem,
-              eventType: data.eventType,
-              lastUpdatedUtc: data.lastUpdatedUtc,
-              message: data.message
-            });
-          });
-          renderFeed();
-          updateMetrics();
-        }
-      } catch (err) {
-        console.warn('Could not fetch history:', err);
+    document.addEventListener('DOMContentLoaded', () => {
+      // Pre-fill APIM URL if served from APIM or Function host
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        document.getElementById('host-url').value = window.location.origin;
       }
-    }
+    });
 
     function getBase() {
       return (document.getElementById('host-url').value || 'http://localhost:7071').replace(/\/$/, '');
-    }
-
-    function getFuncBase() {
-      const funcUrl = document.getElementById('func-url')?.value.trim();
-      return (funcUrl || document.getElementById('host-url').value || 'http://localhost:7071').replace(/\/$/, '');
     }
 
     let autoRefresh = true;
@@ -1227,6 +1190,12 @@
 
     function stopAutoRefresh() {
       if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+    function subKeyHeader() {
+      const k = document.getElementById('sub-key')?.value.trim();
+      return k ? { 'Ocp-Apim-Subscription-Key': k } : {};
     }
 
     // ── Send Order ───────────────────────────────────────────────────────
@@ -1263,11 +1232,7 @@
 
       respBox.textContent = 'Sending to APIM → Logic App…';
 
-      const subKey = document.getElementById('sub-key')?.value.trim();
-      const headers = { 'Content-Type': 'application/json', 'x-correlation-id': evtId };
-      if (subKey) {
-        headers['Ocp-Apim-Subscription-Key'] = subKey;
-      }
+      const headers = { 'Content-Type': 'application/json', 'x-correlation-id': evtId, ...subKeyHeader() };
 
       try {
         const res = await fetch(`${getBase()}/api/events`, {
@@ -1323,7 +1288,7 @@
     async function fetchStatus(correlationId, showInBox = false) {
       const respBox = document.getElementById('lookup-response');
       try {
-        const res = await fetch(`${getFuncBase()}/api/status/${encodeURIComponent(correlationId)}`);
+        const res = await fetch(`${getBase()}/api/status/${encodeURIComponent(correlationId)}`, { headers: subKeyHeader() });
         const text = await res.text();
         let data;
         try { data = JSON.parse(text); } catch { data = null; }

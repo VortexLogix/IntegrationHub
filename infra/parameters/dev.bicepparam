@@ -12,5 +12,3 @@ param tags          = {
   managedBy: 'Bicep'
   owner: 'vivek-karthikeyan'
 }
-param enrichmentFunctionUrl = 'https://d-az1-ih-enrichment-func.azurewebsites.net/api/events/enrich'
-param notificationWebhookUrl = 'https://d-az1-ih-enrichment-func.azurewebsites.net/api/notifications/failure'
