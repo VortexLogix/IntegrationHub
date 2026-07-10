@@ -1,6 +1,24 @@
 <policies>
   <inbound>
     <base />
+    <cors allow-credentials="false">
+      <allowed-origins>
+        <origin>https://d-az1-ih-enrichment-func.azurewebsites.net</origin>
+      </allowed-origins>
+      <allowed-methods>
+        <method>GET</method>
+        <method>POST</method>
+        <method>OPTIONS</method>
+      </allowed-methods>
+      <allowed-headers>
+        <header>Content-Type</header>
+        <header>x-correlation-id</header>
+        <header>Ocp-Apim-Subscription-Key</header>
+      </allowed-headers>
+      <expose-headers>
+        <header>x-correlation-id</header>
+      </expose-headers>
+    </cors>
 
     <set-variable name="correlationId" value='@((string)context.Request.Headers.GetValueOrDefault("x-correlation-id", Guid.NewGuid().ToString()))' />
 
