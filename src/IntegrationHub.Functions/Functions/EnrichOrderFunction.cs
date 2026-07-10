@@ -52,6 +52,7 @@ public sealed class EnrichOrderFunction(
 
         try
         {
+            logger.LogInformation("Business Flow: Order received for processing. CorrelationId: {CorrelationId}, EventId: {EventId}", correlationId, orderEvent.EventId);
             var enriched = await enrichmentService.EnrichAsync(orderEvent, correlationId, cancellationToken).ConfigureAwait(false);
             return new OkObjectResult(enriched);
         }

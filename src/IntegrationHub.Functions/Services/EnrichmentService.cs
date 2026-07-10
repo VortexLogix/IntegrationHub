@@ -65,6 +65,10 @@ public sealed class EnrichmentService : IEnrichmentService
         var serialized = JsonSerializer.Serialize(enriched, JsonSerializerOptions);
         var payloadBytes = Encoding.UTF8.GetByteCount(serialized);
 
+        _logger.LogInformation(
+            "Business Flow: Order enriched. CorrelationId: {CorrelationId}, ProductCode: {ProductCode}, TotalAmount: {TotalAmount}",
+            correlationId, productCode, enriched.TotalAmount);
+
         if (payloadBytes > _claimCheckThresholdBytes)
         {
             var blobPath = await _claimCheckStore

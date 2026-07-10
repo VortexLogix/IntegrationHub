@@ -68,6 +68,10 @@
       "Call_Enrichment_Function": {
         "type": "Http",
         "runAfter": { "Validate_incoming_event": ["Succeeded"] },
+        "trackedProperties": {
+          "BusinessFlowMessage": "Business Flow: Order enrichment requested from Logic App.",
+          "CorrelationId": "@triggerBody()?['eventId']"
+        },
         "inputs": {
           "method": "POST",
           "uri": "@parameters('enrichmentFunctionUrl')",
@@ -125,6 +129,10 @@
 
           "Send_to_Orders_Queue": {
             "type": "ApiConnection",
+            "trackedProperties": {
+              "BusinessFlowMessage": "Business Flow: Order validated and routed to Service Bus queue by Logic App.",
+              "CorrelationId": "@triggerBody()?['eventId']"
+            },
             "inputs": {
               "host": {
                 "connection": { "name": "@parameters('$connections')['serviceBus']['connectionId']" }

@@ -43,6 +43,7 @@ public sealed class OrderDeliveryService(
         var erpEndpoint = configuration["ErpEndpointUrl"];
         if (string.IsNullOrWhiteSpace(erpEndpoint) || erpEndpoint.StartsWith("@Microsoft.KeyVault"))
         {
+            logger.LogInformation("Business Flow: Order processed (ERP not configured). CorrelationId: {CorrelationId}", correlationId);
             logger.LogWarning("ErpEndpointUrl is not configured. Marking order as completed without ERP call.");
             await idempotencyService.MarkProcessedAsync(deliveryKey, cancellationToken).ConfigureAwait(false);
             await statusStore.SetStatusAsync(
@@ -70,6 +71,7 @@ public sealed class OrderDeliveryService(
 
         if (response.IsSuccessStatusCode)
         {
+            logger.LogInformation("Business Flow: Order delivered successfully to ERP. CorrelationId: {CorrelationId}", correlationId);
             logger.LogInformation("ERP delivery accepted for CorrelationId: {CorrelationId}", correlationId);
             await idempotencyService.MarkProcessedAsync(deliveryKey, cancellationToken).ConfigureAwait(false);
             await statusStore.SetStatusAsync(
@@ -83,6 +85,10 @@ public sealed class OrderDeliveryService(
         }
 
         var errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+        logger.LogError(
+            "Business Flow: Order delivery failed. CorrelationId: {CorrelationId}, StatusCode: {StatusCode}",
+            correlationId,
+            (int)response.StatusCode);
         logger.LogWarning(
             "ERP returned {StatusCode} for CorrelationId: {CorrelationId}. Body: {Body}",
             (int)response.StatusCode,

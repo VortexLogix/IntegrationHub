@@ -69,6 +69,11 @@ public sealed class OrderProcessingFunction(
                 correlationId);
         }
 
+        logger.LogInformation(
+            "Business Flow: Order picked up from queue for delivery. CorrelationId: {CorrelationId}, ProductCode: {ProductCode}",
+            correlationId,
+            deserialized.ProductCode);
+
         await deliveryService.DeliverToErpAsync(deserialized, correlationId, cancellationToken).ConfigureAwait(false);
     }
 }

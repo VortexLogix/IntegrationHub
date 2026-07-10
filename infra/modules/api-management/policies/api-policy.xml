@@ -3,7 +3,7 @@
     <base />
     <cors allow-credentials="false">
       <allowed-origins>
-        <origin>https://d-az1-ih-enrichment-func.azurewebsites.net</origin>
+        <origin>*</origin>
       </allowed-origins>
       <allowed-methods>
         <method>GET</method>
@@ -11,16 +11,15 @@
         <method>OPTIONS</method>
       </allowed-methods>
       <allowed-headers>
-        <header>Content-Type</header>
-        <header>x-correlation-id</header>
-        <header>Ocp-Apim-Subscription-Key</header>
+        <header>*</header>
       </allowed-headers>
-      <expose-headers>
-        <header>x-correlation-id</header>
-      </expose-headers>
     </cors>
 
     <set-variable name="correlationId" value='@((string)context.Request.Headers.GetValueOrDefault("x-correlation-id", Guid.NewGuid().ToString()))' />
+
+    <trace source="Business Flow" severity="information">
+      <message>@("Business Flow: Request entered APIM. CorrelationId: " + context.Variables["correlationId"])</message>
+    </trace>
 
     <!-- Rate limit: 10 calls per 60 seconds per subscription key -->
     <rate-limit calls="10" renewal-period="60" />

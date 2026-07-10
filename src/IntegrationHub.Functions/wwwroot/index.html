@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IntegrationHub — Order Monitor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
-      --bg:       #0b1120;
-      --surface:  #111c32;
-      --card:     #162040;
-      --border:   rgba(99,132,255,.18);
-      --text:     #e2e8f0;
-      --muted:    #64748b;
-      --accent:   #6384ff;
-      --green:    #22c55e;
-      --amber:    #f59e0b;
-      --red:      #ef4444;
-      --mono:     'JetBrains Mono', monospace;
+      --bg: #0b1120;
+      --surface: #111c32;
+      --card: #162040;
+      --border: rgba(99, 132, 255, .18);
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --accent: #6384ff;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --mono: 'JetBrains Mono', monospace;
     }
 
     body {
@@ -37,24 +46,58 @@
       justify-content: space-between;
       padding: 0 2rem;
       height: 60px;
-      background: rgba(17,28,50,.9);
+      background: rgba(17, 28, 50, .9);
       border-bottom: 1px solid var(--border);
       backdrop-filter: blur(10px);
       position: sticky;
       top: 0;
       z-index: 50;
     }
-    .logo { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: .5rem; }
-    .logo span { color: var(--accent); }
+
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
     .status-pill {
-      display: flex; align-items: center; gap: .4rem;
-      font-size: .78rem; font-weight: 500;
-      background: rgba(34,197,94,.1); color: var(--green);
-      border: 1px solid rgba(34,197,94,.25); border-radius: 99px;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .78rem;
+      font-weight: 500;
+      background: rgba(34, 197, 94, .1);
+      color: var(--green);
+      border: 1px solid rgba(34, 197, 94, .25);
+      border-radius: 99px;
       padding: .3rem .75rem;
     }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
 
     /* ── layout ── */
     main {
@@ -73,6 +116,7 @@
       border-radius: 14px;
       padding: 1.5rem;
     }
+
     .card-title {
       font-size: .7rem;
       font-weight: 700;
@@ -93,10 +137,27 @@
       gap: 1rem;
       align-items: flex-end;
     }
-    .config-strip .field { flex: 2; }
-    .config-strip .field-sm { flex: 1; }
-    label { display: block; font-size: .72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .4rem; }
-    input[type=text], input[type=password] {
+
+    .config-strip .field {
+      flex: 2;
+    }
+
+    .config-strip .field-sm {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: .4rem;
+    }
+
+    input[type=text],
+    input[type=password] {
       width: 100%;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -108,11 +169,21 @@
       outline: none;
       transition: border-color .2s;
     }
-    input:focus { border-color: var(--accent); }
+
+    input:focus {
+      border-color: var(--accent);
+    }
 
     /* ── form inputs ── */
-    .form-group { margin-bottom: 1rem; }
-    .form-hint { font-size: .7rem; color: var(--muted); margin-top: .25rem; }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-hint {
+      font-size: .7rem;
+      color: var(--muted);
+      margin-top: .25rem;
+    }
 
     select {
       width: 100%;
@@ -138,9 +209,19 @@
       cursor: pointer;
       transition: opacity .2s, transform .1s;
     }
-    .btn-primary:hover { opacity: .88; }
-    .btn-primary:active { transform: scale(.98); }
-    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+    .btn-primary:hover {
+      opacity: .88;
+    }
+
+    .btn-primary:active {
+      transform: scale(.98);
+    }
+
+    .btn-primary:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
 
     .btn-sm {
       padding: .35rem .85rem;
@@ -154,7 +235,10 @@
       white-space: nowrap;
       transition: border-color .2s;
     }
-    .btn-sm:hover { border-color: var(--accent); }
+
+    .btn-sm:hover {
+      border-color: var(--accent);
+    }
 
     /* ── response box ── */
     .resp {
@@ -171,9 +255,20 @@
       max-height: 200px;
       overflow-y: auto;
     }
-    .resp.show { display: block; }
-    .resp.ok   { border-color: rgba(34,197,94,.35); color: var(--green); }
-    .resp.err  { border-color: rgba(239,68,68,.35); color: var(--red); }
+
+    .resp.show {
+      display: block;
+    }
+
+    .resp.ok {
+      border-color: rgba(34, 197, 94, .35);
+      color: var(--green);
+    }
+
+    .resp.err {
+      border-color: rgba(239, 68, 68, .35);
+      color: var(--red);
+    }
 
     /* ── metrics row ── */
     .metrics {
@@ -182,58 +277,193 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
     }
+
     .metric {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1rem 1.25rem;
     }
-    .metric-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-    .metric-value { font-size: 2rem; font-weight: 700; margin: .25rem 0; }
-    .metric-sub   { font-size: .7rem; color: var(--muted); }
-    .metric.total .metric-value  { color: var(--accent); }
-    .metric.done  .metric-value  { color: var(--green); }
-    .metric.proc  .metric-value  { color: var(--amber); }
-    .metric.fail  .metric-value  { color: var(--red); }
+
+    .metric-label {
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: .25rem 0;
+    }
+
+    .metric-sub {
+      font-size: .7rem;
+      color: var(--muted);
+    }
+
+    .metric.total .metric-value {
+      color: var(--accent);
+    }
+
+    .metric.done .metric-value {
+      color: var(--green);
+    }
+
+    .metric.proc .metric-value {
+      color: var(--amber);
+    }
+
+    .metric.fail .metric-value {
+      color: var(--red);
+    }
 
     /* ── feed table ── */
-    .feed-card { grid-column: 2; grid-row: 3; }
-    .feed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
-    th { text-align: left; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 0 .5rem .6rem; border-bottom: 1px solid var(--border); }
-    td { padding: .6rem .5rem; border-bottom: 1px solid rgba(99,132,255,.07); vertical-align: top; }
-    tr:last-child td { border-bottom: none; }
-    .cid { font-family: var(--mono); font-size: .75rem; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .feed-card {
+      grid-column: 2;
+      grid-row: 3;
+    }
+
+    .feed-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .82rem;
+    }
+
+    th {
+      text-align: left;
+      font-size: .68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      padding: 0 .5rem .6rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: .6rem .5rem;
+      border-bottom: 1px solid rgba(99, 132, 255, .07);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .cid {
+      font-family: var(--mono);
+      font-size: .75rem;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     /* ── badges ── */
     .badge {
-      display: inline-flex; align-items: center; gap: .3rem;
-      font-size: .72rem; font-weight: 600;
-      padding: .2rem .55rem; border-radius: 99px;
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      font-size: .72rem;
+      font-weight: 600;
+      padding: .2rem .55rem;
+      border-radius: 99px;
     }
-    .badge::before { content:''; width:6px; height:6px; border-radius:50%; }
-    .badge.completed { background:rgba(34,197,94,.12); color:var(--green); }
-    .badge.completed::before { background:var(--green); }
-    .badge.processing { background:rgba(245,158,11,.12); color:var(--amber); }
-    .badge.processing::before { background:var(--amber); animation: pulse 1.5s infinite; }
-    .badge.failed { background:rgba(239,68,68,.12); color:var(--red); }
-    .badge.failed::before { background:var(--red); }
-    .badge.unknown { background:rgba(100,116,139,.12); color:var(--muted); }
-    .badge.unknown::before { background:var(--muted); }
+
+    .badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .badge.completed {
+      background: rgba(34, 197, 94, .12);
+      color: var(--green);
+    }
+
+    .badge.completed::before {
+      background: var(--green);
+    }
+
+    .badge.processing {
+      background: rgba(245, 158, 11, .12);
+      color: var(--amber);
+    }
+
+    .badge.processing::before {
+      background: var(--amber);
+      animation: pulse 1.5s infinite;
+    }
+
+    .badge.failed {
+      background: rgba(239, 68, 68, .12);
+      color: var(--red);
+    }
+
+    .badge.failed::before {
+      background: var(--red);
+    }
+
+    .badge.unknown {
+      background: rgba(100, 116, 139, .12);
+      color: var(--muted);
+    }
+
+    .badge.unknown::before {
+      background: var(--muted);
+    }
 
     /* ── empty state ── */
-    .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
-    .empty-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+    .empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+    }
+
+    .empty-icon {
+      font-size: 2.5rem;
+      margin-bottom: .75rem;
+    }
 
     /* ── lookup row ── */
-    .lookup-row { display: flex; gap: .5rem; }
-    .lookup-row input { flex: 1; }
+    .lookup-row {
+      display: flex;
+      gap: .5rem;
+    }
+
+    .lookup-row input {
+      flex: 1;
+    }
 
     /* ── divider ── */
-    hr { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.25rem 0;
+    }
 
     /* ── toast ── */
-    #toasts { position: fixed; bottom: 1.5rem; right: 1.5rem; display: flex; flex-direction: column; gap: .5rem; z-index: 9999; }
+    #toasts {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      z-index: 9999;
+    }
+
     .toast {
       padding: .65rem 1.1rem;
       border-radius: 8px;
@@ -242,303 +472,355 @@
       border: 1px solid;
       animation: slideIn .25s ease;
     }
-    .toast.success { background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.3); color:var(--green); }
-    .toast.error   { background:rgba(239,68,68,.12);  border-color:rgba(239,68,68,.3);  color:var(--red); }
-    .toast.info    { background:rgba(99,132,255,.12); border-color:rgba(99,132,255,.3); color:var(--accent); }
-    @keyframes slideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+    .toast.success {
+      background: rgba(34, 197, 94, .12);
+      border-color: rgba(34, 197, 94, .3);
+      color: var(--green);
+    }
+
+    .toast.error {
+      background: rgba(239, 68, 68, .12);
+      border-color: rgba(239, 68, 68, .3);
+      color: var(--red);
+    }
+
+    .toast.info {
+      background: rgba(99, 132, 255, .12);
+      border-color: rgba(99, 132, 255, .3);
+      color: var(--accent);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
   </style>
 </head>
+
 <body>
 
-<header>
-  <div class="logo">⚡ Integration<span>Hub</span></div>
-  <div class="status-pill"><div class="dot"></div>System Online</div>
-</header>
-
-<main>
-
-  <!-- Config strip -->
-  <div class="config-strip">
-    <div class="field">
-      <label>🛡️ APIM Gateway URL</label>
-      <input type="text" id="apim-url" placeholder="https://d-az1-ih-gw-apim.azure-api.net" />
+  <header>
+    <div class="logo">⚡ Integration<span>Hub</span></div>
+    <div class="status-pill">
+      <div class="dot"></div>System Online
     </div>
-    <div class="field-sm">
-      <label>🔑 Subscription Key (optional)</label>
-      <input type="password" id="sub-key" placeholder="Ocp-Apim-Subscription-Key" />
-    </div>
-  </div>
+  </header>
 
-  <!-- Metrics -->
-  <div class="metrics">
-    <div class="metric total"><div class="metric-label">Orders Tracked</div><div class="metric-value" id="m-total">0</div><div class="metric-sub">this session</div></div>
-    <div class="metric done"><div class="metric-label">Completed</div><div class="metric-value" id="m-done">0</div><div class="metric-sub">ERP delivered</div></div>
-    <div class="metric proc"><div class="metric-label">Processing</div><div class="metric-value" id="m-proc">0</div><div class="metric-sub">in pipeline</div></div>
-    <div class="metric fail"><div class="metric-label">Failed</div><div class="metric-value" id="m-fail">0</div><div class="metric-sub">ERP rejected</div></div>
-  </div>
+  <main>
 
-  <!-- Send panel -->
-  <div class="card">
-    <div class="card-title">🚀 Send Order Event</div>
-
-    <div class="form-group">
-      <label>Event ID (Correlation ID)</label>
-      <input type="text" id="evt-id" placeholder="auto-generated" />
-      <div class="form-hint">Leave blank → UUID generated for you</div>
+    <!-- Config strip -->
+    <div class="config-strip">
+      <div class="field">
+        <label>🛡️ APIM Gateway URL</label>
+        <input type="text" id="apim-url" placeholder="https://d-az1-ih-gw-apim.azure-api.net"
+          oninput="sessionStorage.setItem('apim-url',this.value)" />
+      </div>
+      <div class="field-sm">
+        <label>🔑 Subscription Key</label>
+        <input type="password" id="sub-key" placeholder="Ocp-Apim-Subscription-Key"
+          oninput="sessionStorage.setItem('sub-key',this.value)" />
+      </div>
     </div>
 
-    <div class="form-group">
-      <label>Product Code</label>
-      <input type="text" id="product-code" value="SKU-9001" />
-      <div class="form-hint">SKU-9001 · SKU-4100 · any other → General</div>
+    <!-- Metrics -->
+    <div class="metrics">
+      <div class="metric total">
+        <div class="metric-label">Orders Tracked</div>
+        <div class="metric-value" id="m-total">0</div>
+        <div class="metric-sub">this session</div>
+      </div>
+      <div class="metric done">
+        <div class="metric-label">Completed</div>
+        <div class="metric-value" id="m-done">0</div>
+        <div class="metric-sub">ERP delivered</div>
+      </div>
+      <div class="metric proc">
+        <div class="metric-label">Processing</div>
+        <div class="metric-value" id="m-proc">0</div>
+        <div class="metric-sub">in pipeline</div>
+      </div>
+      <div class="metric fail">
+        <div class="metric-label">Failed</div>
+        <div class="metric-value" id="m-fail">0</div>
+        <div class="metric-sub">ERP rejected</div>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label>Quantity</label>
-      <input type="text" id="quantity" value="2" />
+    <!-- Send panel -->
+    <div class="card">
+      <div class="card-title">🚀 Send Order Event</div>
+
+      <div class="form-group">
+        <label>Event ID (Correlation ID)</label>
+        <input type="text" id="evt-id" placeholder="auto-generated" />
+        <div class="form-hint">Leave blank → UUID generated for you</div>
+      </div>
+
+      <div class="form-group">
+        <label>Product Code</label>
+        <input type="text" id="product-code" value="SKU-9001" />
+        <div class="form-hint">SKU-9001 · SKU-4100 · any other → General</div>
+      </div>
+
+      <div class="form-group">
+        <label>Quantity</label>
+        <input type="text" id="quantity" value="2" />
+      </div>
+
+      <div class="form-group">
+        <label>Source System</label>
+        <select id="source-system">
+          <option>CRM</option>
+          <option>Portal</option>
+          <option>ERP</option>
+          <option>Manual</option>
+        </select>
+      </div>
+
+      <button class="btn-primary" id="btn-send" onclick="sendOrder()">⚡ Send Order Event</button>
+      <div class="resp" id="send-resp"></div>
+
+      <hr />
+
+      <div class="card-title">🔍 Check Order Status</div>
+      <div class="lookup-row">
+        <input type="text" id="lookup-id" placeholder="correlation-id" />
+        <button class="btn-sm" onclick="lookupStatus()">Check</button>
+      </div>
+      <div class="resp" id="lookup-resp"></div>
     </div>
 
-    <div class="form-group">
-      <label>Source System</label>
-      <select id="source-system">
-        <option>CRM</option>
-        <option>Portal</option>
-        <option>ERP</option>
-        <option>Manual</option>
-      </select>
+    <!-- Feed -->
+    <div class="card feed-card">
+      <div class="feed-header">
+        <div class="card-title" style="margin:0">📋 Live Order Feed</div>
+        <button class="btn-sm" onclick="refreshAll()">↻ Refresh</button>
+      </div>
+      <div id="feed"></div>
     </div>
 
-    <button class="btn-primary" id="btn-send" onclick="sendOrder()">⚡ Send Order Event</button>
-    <div class="resp" id="send-resp"></div>
+  </main>
 
-    <hr />
+  <div id="toasts"></div>
 
-    <div class="card-title">🔍 Check Order Status</div>
-    <div class="lookup-row">
-      <input type="text" id="lookup-id" placeholder="correlation-id" />
-      <button class="btn-sm" onclick="lookupStatus()">Check</button>
-    </div>
-    <div class="resp" id="lookup-resp"></div>
-  </div>
+  <script>
+    // ── State ──
+    // ponytail: simple Map is fine for session-scoped tracking; no localStorage needed
+    const orders = new Map(); // correlationId → { status, sourceSystem, eventType, message, lastUpdatedUtc }
 
-  <!-- Feed -->
-  <div class="card feed-card">
-    <div class="feed-header">
-      <div class="card-title" style="margin:0">📋 Live Order Feed</div>
-      <button class="btn-sm" onclick="refreshAll()">↻ Refresh</button>
-    </div>
-    <div id="feed"></div>
-  </div>
+    // ── Helpers ──
+    function apimBase() {
+      return (document.getElementById('apim-url').value.trim() || 'https://d-az1-ih-gw-apim.azure-api.net').replace(/\/$/, '');
+    }
 
-</main>
+    function authHeaders(extra = {}) {
+      const key = document.getElementById('sub-key').value.trim();
+      return {
+        'Content-Type': 'application/json',
+        ...(key ? { 'Ocp-Apim-Subscription-Key': key } : {}),
+        ...extra
+      };
+    }
 
-<div id="toasts"></div>
-
-<script>
-  // ── State ──
-  // ponytail: simple Map is fine for session-scoped tracking; no localStorage needed
-  const orders = new Map(); // correlationId → { status, sourceSystem, eventType, message, lastUpdatedUtc }
-
-  // ── Helpers ──
-  function apimBase() {
-    return (document.getElementById('apim-url').value.trim() || 'https://d-az1-ih-gw-apim.azure-api.net').replace(/\/$/, '');
-  }
-
-  function authHeaders(extra = {}) {
-    const key = document.getElementById('sub-key').value.trim();
-    return {
-      'Content-Type': 'application/json',
-      ...(key ? { 'Ocp-Apim-Subscription-Key': key } : {}),
-      ...extra
-    };
-  }
-
-  function uuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-      const r = Math.random() * 16 | 0;
-      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
-  }
-
-  function toast(msg, type = 'info') {
-    const el = document.createElement('div');
-    el.className = `toast ${type}`;
-    el.textContent = msg;
-    document.getElementById('toasts').appendChild(el);
-    setTimeout(() => el.remove(), 4000);
-  }
-
-  function timeAgo(iso) {
-    const s = (Date.now() - new Date(iso)) / 1000;
-    if (s < 5)    return 'just now';
-    if (s < 60)   return `${Math.floor(s)}s ago`;
-    if (s < 3600) return `${Math.floor(s/60)}m ago`;
-    return `${Math.floor(s/3600)}h ago`;
-  }
-
-  function showResp(id, text, ok) {
-    const el = document.getElementById(id);
-    el.textContent = text;
-    el.className = `resp show ${ok ? 'ok' : 'err'}`;
-  }
-
-  // ── Send Order ──
-  async function sendOrder() {
-    const btn = document.getElementById('btn-send');
-    const correlationId = document.getElementById('evt-id').value.trim() || uuid();
-    const productCode   = document.getElementById('product-code').value.trim() || 'SKU-9001';
-    const quantity      = parseInt(document.getElementById('quantity').value) || 1;
-    const sourceSystem  = document.getElementById('source-system').value;
-
-    const body = {
-      eventId: correlationId,
-      eventType: 'OrderCreated',
-      sourceSystem,
-      payload: { productCode, quantity, customerId: `cust-${Math.floor(Math.random()*10000)}` }
-    };
-
-    btn.disabled = true;
-    btn.textContent = '⏳ Sending…';
-
-    const url = `${apimBase()}/api/events`;
-
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: authHeaders({ 'x-correlation-id': correlationId }),
-        body: JSON.stringify(body)
+    function uuid() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
       });
+    }
 
-      const text = await res.text();
-      let pretty = text;
-      try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch {}
+    function toast(msg, type = 'info') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      document.getElementById('toasts').appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
 
-      showResp('send-resp', `HTTP ${res.status}\n\n${pretty}`, res.ok || res.status === 202);
+    function timeAgo(iso) {
+      const s = (Date.now() - new Date(iso)) / 1000;
+      if (s < 5) return 'just now';
+      if (s < 60) return `${Math.floor(s)}s ago`;
+      if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+      return `${Math.floor(s / 3600)}h ago`;
+    }
 
-      if (res.ok || res.status === 202) {
-        // Optimistically add to feed as Processing
-        orders.set(correlationId, {
-          status: 'Processing',
-          sourceSystem,
-          eventType: 'OrderCreated',
-          message: 'Accepted by APIM → pipeline started',
-          lastUpdatedUtc: new Date().toISOString()
+    function showResp(id, text, ok) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = `resp show ${ok ? 'ok' : 'err'}`;
+    }
+
+    // ── Send Order ──
+    async function sendOrder() {
+      const btn = document.getElementById('btn-send');
+      const correlationId = document.getElementById('evt-id').value.trim() || uuid();
+      const productCode = document.getElementById('product-code').value.trim() || 'SKU-9001';
+      const quantity = parseInt(document.getElementById('quantity').value) || 1;
+      const sourceSystem = document.getElementById('source-system').value;
+
+      const body = {
+        eventId: correlationId,
+        eventType: 'OrderCreated',
+        sourceSystem,
+        payload: { productCode, quantity, customerId: `cust-${Math.floor(Math.random() * 10000)}` }
+      };
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Sending…';
+
+      const url = `${apimBase()}/api/events`;
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: authHeaders({ 'x-correlation-id': correlationId }),
+          body: JSON.stringify(body)
         });
-        document.getElementById('lookup-id').value = correlationId;
-        renderFeed();
-        toast(`Sent ${correlationId.substring(0, 8)}… — tracking`, 'success');
-        // Auto-check status after 4s
-        setTimeout(() => fetchStatus(correlationId), 4000);
-        setTimeout(() => fetchStatus(correlationId), 10000);
-      } else {
-        toast(`Send failed: HTTP ${res.status}`, 'error');
+
+        const text = await res.text();
+        let pretty = text;
+        try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch { }
+
+        showResp('send-resp', `HTTP ${res.status}\n\n${pretty}`, res.ok || res.status === 202);
+
+        if (res.ok || res.status === 202) {
+          // Optimistically add to feed as Processing
+          orders.set(correlationId, {
+            status: 'Processing',
+            sourceSystem,
+            eventType: 'OrderCreated',
+            message: 'Accepted by APIM → pipeline started',
+            lastUpdatedUtc: new Date().toISOString()
+          });
+          document.getElementById('lookup-id').value = correlationId;
+          renderFeed();
+          toast(`Sent ${correlationId.substring(0, 8)}… — tracking`, 'success');
+          // Auto-check status after 4s
+          setTimeout(() => fetchStatus(correlationId), 4000);
+          setTimeout(() => fetchStatus(correlationId), 10000);
+        } else {
+          toast(`Send failed: HTTP ${res.status}`, 'error');
+        }
+      } catch (err) {
+        showResp('send-resp',
+          `Network error: ${err.message}\n\nURL: ${url}\n\nMake sure:\n• APIM URL is https://d-az1-ih-gw-apim.azure-api.net\n• NOT the Function App URL`,
+          false
+        );
+        toast('Network error', 'error');
       }
-    } catch (err) {
-      showResp('send-resp',
-        `Network error: ${err.message}\n\nURL: ${url}\n\nMake sure:\n• APIM URL is https://d-az1-ih-gw-apim.azure-api.net\n• NOT the Function App URL`,
-        false
-      );
-      toast('Network error', 'error');
+
+      btn.disabled = false;
+      btn.textContent = '⚡ Send Order Event';
     }
 
-    btn.disabled = false;
-    btn.textContent = '⚡ Send Order Event';
-  }
+    // ── Status check ──
+    async function lookupStatus() {
+      const id = document.getElementById('lookup-id').value.trim();
+      if (!id) { toast('Enter a Correlation ID', 'info'); return; }
+      await fetchStatus(id, true);
+    }
 
-  // ── Status check ──
-  async function lookupStatus() {
-    const id = document.getElementById('lookup-id').value.trim();
-    if (!id) { toast('Enter a Correlation ID', 'info'); return; }
-    await fetchStatus(id, true);
-  }
+    async function fetchStatus(correlationId, showBox = false) {
+      const url = `${apimBase()}/api/status/${encodeURIComponent(correlationId)}`;
+      try {
+        const res = await fetch(url, { headers: authHeaders() });
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch { }
 
-  async function fetchStatus(correlationId, showBox = false) {
-    const url = `${apimBase()}/api/status/${encodeURIComponent(correlationId)}`;
-    try {
-      const res = await fetch(url, { headers: authHeaders() });
-      const text = await res.text();
-      let data;
-      try { data = JSON.parse(text); } catch {}
-
-      if (res.ok && data) {
-        orders.set(correlationId, {
-          status:        data.status,
-          sourceSystem:  data.sourceSystem,
-          eventType:     data.eventType,
-          message:       data.message,
-          lastUpdatedUtc: data.lastUpdatedUtc
-        });
-        renderFeed();
-        if (showBox) showResp('lookup-resp', JSON.stringify(data, null, 2), true);
-      } else if (res.status === 404) {
-        if (showBox) showResp('lookup-resp', `404 — No status record found for:\n${correlationId}\n\nOrder may still be processing.`, false);
-      } else {
-        if (showBox) showResp('lookup-resp', `HTTP ${res.status}\n${text}`, false);
+        if (res.ok && data) {
+          orders.set(correlationId, {
+            status: data.status,
+            sourceSystem: data.sourceSystem,
+            eventType: data.eventType,
+            message: data.message,
+            lastUpdatedUtc: data.lastUpdatedUtc
+          });
+          renderFeed();
+          if (showBox) showResp('lookup-resp', JSON.stringify(data, null, 2), true);
+        } else if (res.status === 404) {
+          if (showBox) showResp('lookup-resp', `404 — No status record found for:\n${correlationId}\n\nOrder may still be processing.`, false);
+        } else {
+          if (showBox) showResp('lookup-resp', `HTTP ${res.status}\n${text}`, false);
+        }
+      } catch (err) {
+        if (showBox) showResp('lookup-resp', `Network error: ${err.message}`, false);
       }
-    } catch (err) {
-      if (showBox) showResp('lookup-resp', `Network error: ${err.message}`, false);
-    }
-  }
-
-  // ── Refresh all tracked orders ──
-  async function refreshAll() {
-    await Promise.all([...orders.keys()].map(id => fetchStatus(id)));
-    toast('Feed refreshed', 'info');
-  }
-
-  // ── Render feed ──
-  function renderFeed() {
-    const container = document.getElementById('feed');
-
-    if (orders.size === 0) {
-      container.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>No orders tracked yet.<br>Send a test order above.</p></div>`;
-      updateMetrics();
-      return;
     }
 
-    const rows = [...orders.entries()].reverse().map(([id, o]) => {
-      const s = (o.status || 'unknown').toLowerCase();
-      const updated = o.lastUpdatedUtc ? timeAgo(o.lastUpdatedUtc) : '—';
-      return `<tr>
+    // ── Refresh all tracked orders ──
+    async function refreshAll() {
+      await Promise.all([...orders.keys()].map(id => fetchStatus(id)));
+      toast('Feed refreshed', 'info');
+    }
+
+    // ── Render feed ──
+    function renderFeed() {
+      const container = document.getElementById('feed');
+
+      if (orders.size === 0) {
+        container.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>No orders tracked yet.<br>Send a test order above.</p></div>`;
+        updateMetrics();
+        return;
+      }
+
+      const rows = [...orders.entries()].reverse().map(([id, o]) => {
+        const s = (o.status || 'unknown').toLowerCase();
+        const updated = o.lastUpdatedUtc ? timeAgo(o.lastUpdatedUtc) : '—';
+        return `<tr>
         <td><div class="cid" title="${id}">${id}</div><div style="font-size:.7rem;color:var(--muted);margin-top:2px">${o.message || ''}</div></td>
         <td style="font-size:.78rem">${o.sourceSystem || '—'}</td>
         <td><span class="badge ${s}">${o.status || 'Unknown'}</span></td>
         <td style="font-size:.75rem;color:var(--muted)">${updated}</td>
         <td><button class="btn-sm" onclick="document.getElementById('lookup-id').value='${id}';fetchStatus('${id}',true)">Check</button></td>
       </tr>`;
-    }).join('');
+      }).join('');
 
-    container.innerHTML = `<table>
+      container.innerHTML = `<table>
       <thead><tr><th>Correlation ID</th><th>Source</th><th>Status</th><th>Updated</th><th></th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
 
-    updateMetrics();
-  }
+      updateMetrics();
+    }
 
-  // ── Metrics ──
-  function updateMetrics() {
-    const all = [...orders.values()];
-    document.getElementById('m-total').textContent = all.length;
-    document.getElementById('m-done').textContent  = all.filter(o => o.status?.toLowerCase() === 'completed').length;
-    document.getElementById('m-proc').textContent  = all.filter(o => o.status?.toLowerCase() === 'processing').length;
-    document.getElementById('m-fail').textContent  = all.filter(o => o.status?.toLowerCase() === 'failed').length;
-  }
+    // ── Metrics ──
+    function updateMetrics() {
+      const all = [...orders.values()];
+      document.getElementById('m-total').textContent = all.length;
+      document.getElementById('m-done').textContent = all.filter(o => o.status?.toLowerCase() === 'completed').length;
+      document.getElementById('m-proc').textContent = all.filter(o => o.status?.toLowerCase() === 'processing').length;
+      document.getElementById('m-fail').textContent = all.filter(o => o.status?.toLowerCase() === 'failed').length;
+    }
 
-  // ── Auto-refresh processing orders every 8s ──
-  setInterval(() => {
-    const processing = [...orders.entries()].filter(([,o]) => o.status?.toLowerCase() === 'processing');
-    processing.forEach(([id]) => fetchStatus(id));
-  }, 8000);
+    // ── Auto-refresh processing orders every 8s ──
+    setInterval(() => {
+      const processing = [...orders.entries()].filter(([, o]) => o.status?.toLowerCase() === 'processing');
+      processing.forEach(([id]) => fetchStatus(id));
+    }, 8000);
 
-  // ── Ctrl+Enter to send ──
-  document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') sendOrder();
-  });
+    // ── Ctrl+Enter to send ──
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') sendOrder();
+    });
 
-  // ── Init ──
-  renderFeed();
-</script>
+    // ── Init ──
+    const savedUrl = sessionStorage.getItem('apim-url');
+    const savedKey = sessionStorage.getItem('sub-key');
+    if (savedUrl) document.getElementById('apim-url').value = savedUrl;
+    if (savedKey) document.getElementById('sub-key').value = savedKey;
+    renderFeed();
+  </script>
 
 </body>
+
 </html>
