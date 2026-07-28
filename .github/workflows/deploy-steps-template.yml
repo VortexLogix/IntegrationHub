@@ -124,4 +124,5 @@ jobs:
           az functionapp deployment source config-zip \
             --resource-group ${{ inputs.resource_group }} \
             --name ${{ inputs.function_app_name }} \
-            --src ../functions.zip
+            --src ../functions.zip \
+            --clean-deployment true

@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IntegrationHub — Client Presentation</title>
+  <meta name="description" content="IntegrationHub: A production-grade Azure event-driven integration platform. Reliable, observable, and secure order processing from any source system to ERP." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #07101f;
+      --surface: #0d1a2e;
+      --card:    #112039;
+      --border:  rgba(99,179,255,.12);
+      --text:    #e2eeff;
+      --muted:   #6a87a8;
+      --accent:  #3b8bff;
+      --accent2: #7c3aed;
+      --green:   #22c55e;
+      --amber:   #f59e0b;
+      --red:     #ef4444;
+      --teal:    #14b8a6;
+      --mono:    'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+      background: linear-gradient(170deg, #0a1628 0%, #07101f 60%);
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(59,139,255,.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      background: rgba(59,139,255,.12);
+      color: var(--accent);
+      border: 1px solid rgba(59,139,255,.3);
+      border-radius: 99px;
+      padding: .3rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -.03em;
+      margin-bottom: 1rem;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 640px;
+      margin: 0 auto 2rem;
+    }
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+      justify-content: center;
+      margin-bottom: 2.5rem;
+    }
+    .pill {
+      font-size: .75rem;
+      font-weight: 600;
+      padding: .3rem .85rem;
+      border-radius: 99px;
+      border: 1px solid;
+    }
+    .pill-blue  { background: rgba(59,139,255,.1);  color: #7eb8ff; border-color: rgba(59,139,255,.3); }
+    .pill-green { background: rgba(34,197,94,.1);   color: #4ade80; border-color: rgba(34,197,94,.3); }
+    .pill-purple{ background: rgba(124,58,237,.1);  color: #a78bfa; border-color: rgba(124,58,237,.3); }
+    .pill-teal  { background: rgba(20,184,166,.1);  color: #2dd4bf; border-color: rgba(20,184,166,.3); }
+    .pill-amber { background: rgba(245,158,11,.1);  color: #fbbf24; border-color: rgba(245,158,11,.3); }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(7,16,31,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-inner::-webkit-scrollbar { display: none; }
+    .nav-btn {
+      flex-shrink: 0;
+      padding: .85rem 1.25rem;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+      white-space: nowrap;
+    }
+    .nav-btn:hover { color: var(--text); }
+    .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── SECTIONS ── */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3.5rem 2rem;
+    }
+
+    .section-title {
+      font-size: 1.9rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: .5rem;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 680px;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.75rem;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .card-icon { font-size: 2rem; margin-bottom: .75rem; }
+    .card-title { font-size: 1rem; font-weight: 700; margin-bottom: .4rem; }
+    .card-text { font-size: .87rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── PROBLEM SECTION ── */
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .pain-card {
+      background: rgba(239,68,68,.06);
+      border: 1px solid rgba(239,68,68,.18);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+    .pain-card .card-title { color: #fca5a5; }
+    .pain-card .card-text  { color: #94a3b8; }
+
+    .before-after {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    @media (max-width: 640px) { .before-after { grid-template-columns: 1fr; } }
+    .before-box {
+      background: rgba(239,68,68,.07);
+      border: 1px solid rgba(239,68,68,.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .after-box {
+      background: rgba(34,197,94,.07);
+      border: 1px solid rgba(34,197,94,.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .ba-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .before-box .ba-label { color: #f87171; }
+    .after-box  .ba-label { color: #4ade80; }
+    .ba-list { list-style: none; }
+    .ba-list li {
+      font-size: .87rem;
+      color: var(--muted);
+      padding: .4rem 0;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      display: flex;
+      align-items: flex-start;
+      gap: .5rem;
+    }
+    .ba-list li:last-child { border: none; }
+    .ba-list li .ico { flex-shrink: 0; }
+
+    /* ── FLOW SECTION ── */
+    .flow-steps { display: flex; flex-direction: column; gap: .75rem; }
+    .flow-step {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .flow-step:hover { border-color: rgba(59,139,255,.35); }
+    .flow-step.open  { border-color: rgba(59,139,255,.5); }
+    .flow-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      user-select: none;
+    }
+    .step-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(59,139,255,.15);
+      border: 1px solid rgba(59,139,255,.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .75rem;
+      font-weight: 800;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .step-label { font-weight: 700; font-size: .95rem; flex: 1; }
+    .step-tag {
+      font-size: .67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: .2rem .55rem;
+      border-radius: 99px;
+    }
+    .tag-apim   { background: rgba(59,139,255,.12); color: #7eb8ff; }
+    .tag-la     { background: rgba(124,58,237,.12); color: #a78bfa; }
+    .tag-fn     { background: rgba(20,184,166,.12); color: #2dd4bf; }
+    .tag-sb     { background: rgba(245,158,11,.12); color: #fbbf24; }
+    .tag-store  { background: rgba(34,197,94,.12);  color: #4ade80; }
+    .step-chevron { color: var(--muted); transition: transform .2s; font-size: 1rem; }
+    .flow-step.open .step-chevron { transform: rotate(90deg); }
+    .flow-body {
+      display: none;
+      padding: 0 1.25rem 1.25rem 4.25rem;
+    }
+    .flow-step.open .flow-body { display: block; }
+    .flow-body ul { list-style: none; }
+    .flow-body li {
+      font-size: .85rem;
+      color: var(--muted);
+      padding: .3rem 0;
+      padding-left: 1rem;
+      position: relative;
+    }
+    .flow-body li::before { content: '→'; position: absolute; left: 0; color: var(--accent); }
+    .flow-body li strong { color: var(--text); }
+    .flow-body code {
+      font-family: var(--mono);
+      font-size: .78rem;
+      background: rgba(59,139,255,.1);
+      color: #93c5fd;
+      padding: .15rem .4rem;
+      border-radius: 4px;
+    }
+    .connector {
+      width: 2px;
+      height: 20px;
+      background: linear-gradient(to bottom, rgba(59,139,255,.4), rgba(59,139,255,.1));
+      margin-left: 27px;
+    }
+
+    /* ── RELIABILITY ── */
+    .rel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .rel-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+    .rel-card:hover { border-color: rgba(59,139,255,.3); }
+    .rel-icon { font-size: 1.75rem; margin-bottom: .6rem; }
+    .rel-title { font-weight: 700; font-size: .95rem; margin-bottom: .4rem; }
+    .rel-text  { font-size: .83rem; color: var(--muted); line-height: 1.65; }
+    .rel-tag {
+      display: inline-block;
+      margin-top: .6rem;
+      font-size: .67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: .2rem .55rem;
+      border-radius: 99px;
+      background: rgba(34,197,94,.1);
+      color: #4ade80;
+      border: 1px solid rgba(34,197,94,.25);
+    }
+
+    /* ── OBSERVABILITY ── */
+    .kql-block {
+      background: #080f1d;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1rem 0;
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: #93c5fd;
+      overflow-x: auto;
+      line-height: 1.8;
+    }
+    .kql-comment { color: #4a6481; }
+    .kql-keyword { color: #a78bfa; }
+    .kql-string  { color: #4ade80; }
+
+    .obs-flow {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex-wrap: wrap;
+      margin: 1.5rem 0;
+    }
+    .obs-node {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .5rem 1rem;
+      font-size: .8rem;
+      font-weight: 600;
+    }
+    .obs-arrow { color: var(--muted); font-size: 1.1rem; }
+
+    /* ── SECURITY ── */
+    .sec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .sec-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      display: flex;
+      gap: 1rem;
+    }
+    .sec-ico { font-size: 1.5rem; flex-shrink: 0; }
+    .sec-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .2rem; }
+    .sec-value { font-size: .88rem; font-weight: 600; }
+    .sec-sub   { font-size: .78rem; color: var(--muted); margin-top: .2rem; }
+
+    /* ── DEMO ── */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    @media (max-width: 680px) { .demo-grid { grid-template-columns: 1fr; } }
+    .demo-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.75rem;
+    }
+    .demo-step {
+      display: flex;
+      gap: .75rem;
+      margin-bottom: 1rem;
+      align-items: flex-start;
+    }
+    .demo-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-size: .7rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .demo-text { font-size: .85rem; color: var(--muted); }
+    .demo-text strong { color: var(--text); }
+    .demo-endpoint {
+      font-family: var(--mono);
+      font-size: .75rem;
+      background: rgba(59,139,255,.1);
+      color: #93c5fd;
+      border: 1px solid rgba(59,139,255,.2);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      margin: .5rem 0;
+      word-break: break-all;
+    }
+
+    /* ── NEXT STEPS ── */
+    .gap-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+    .gap-table th {
+      text-align: left;
+      font-size: .68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      padding: .6rem .75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .gap-table td {
+      padding: .75rem;
+      border-bottom: 1px solid rgba(99,179,255,.06);
+      vertical-align: top;
+    }
+    .gap-table tr:last-child td { border: none; }
+    .gap-table td:first-child { color: #fbbf24; font-weight: 600; }
+    .gap-table td:last-child  { color: var(--muted); }
+    .priority {
+      font-size: .67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      padding: .15rem .45rem;
+      border-radius: 99px;
+    }
+    .p-high   { background: rgba(239,68,68,.12); color: #f87171; }
+    .p-med    { background: rgba(245,158,11,.12); color: #fbbf24; }
+    .p-low    { background: rgba(99,179,255,.12); color: #7eb8ff; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .82rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .section.active .container { animation: fadeUp .35s ease; }
+  </style>
+</head>
+
+<body>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-badge">Enterprise Integration Platform · Azure Prototype</div>
+  <h1>Integration<span>Hub</span></h1>
+  <p class="hero-sub">
+    A reliable, observable, and secure event-driven pipeline that connects any source system to your ERP — without the chaos of point-to-point integrations.
+  </p>
+  <div class="hero-pills">
+    <span class="pill pill-blue">Azure Functions .NET 10</span>
+    <span class="pill pill-purple">Logic Apps</span>
+    <span class="pill pill-blue">API Management</span>
+    <span class="pill pill-amber">Service Bus</span>
+    <span class="pill pill-green">App Insights</span>
+    <span class="pill pill-teal">Bicep IaC</span>
+  </div>
+</div>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="show('problem', this)">🔥 The Problem</button>
+    <button class="nav-btn" onclick="show('solution', this)">💡 Our Solution</button>
+    <button class="nav-btn" onclick="show('flow', this)">⚙️ How It Works</button>
+    <button class="nav-btn" onclick="show('reliability', this)">🛡️ Reliability</button>
+    <button class="nav-btn" onclick="show('observability', this)">📊 Observability</button>
+    <button class="nav-btn" onclick="show('security', this)">🔒 Security</button>
+    <button class="nav-btn" onclick="show('demo', this)">🚀 Live Demo</button>
+    <button class="nav-btn" onclick="show('next', this)">📋 What's Next</button>
+  </div>
+</nav>
+
+<!-- ── SECTION: PROBLEM ── -->
+<div id="s-problem" class="section active">
+  <div class="container">
+    <div class="section-title">🔥 The Problem</div>
+    <p class="section-sub">When an order event needs to travel from a CRM, portal, or internal tool to an ERP, the typical approach creates a fragile system that fails silently.</p>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="card-icon">🔁</div>
+        <div class="card-title">Duplicate Processing</div>
+        <div class="card-text">Network timeouts and retries cause the same order to be created multiple times in the ERP. No idempotency means every retry is a risk.</div>
+      </div>
+      <div class="pain-card">
+        <div class="card-icon">📦</div>
+        <div class="card-title">Payload Size Limits</div>
+        <div class="card-text">Message queues have hard limits (e.g. 64 KB on Azure Service Bus). Large order payloads silently fail or get truncated without any error surfaced to the business.</div>
+      </div>
+      <div class="pain-card">
+        <div class="card-icon">🌑</div>
+        <div class="card-title">No Visibility</div>
+        <div class="card-text">When an order disappears, there is no correlation ID, no logs, no status API. Operations teams manually search databases to find what happened.</div>
+      </div>
+      <div class="pain-card">
+        <div class="card-icon">⛓️</div>
+        <div class="card-title">Tight Coupling</div>
+        <div class="card-text">Source system (CRM) calls ERP directly. One ERP maintenance window brings down all order submissions. Any ERP API change breaks every source.</div>
+      </div>
+      <div class="pain-card">
+        <div class="card-icon">💥</div>
+        <div class="card-title">Silent Failures</div>
+        <div class="card-text">When the ERP is unreachable, orders disappear with no alerting, no retry, no dead-letter queue. The business finds out days later from the customer.</div>
+      </div>
+      <div class="pain-card">
+        <div class="card-icon">🔐</div>
+        <div class="card-title">Security Debt</div>
+        <div class="card-text">Connection strings hardcoded in config files, no rate limiting on public endpoints, no audit trail of who sent what and when.</div>
+      </div>
+    </div>
+
+    <div class="before-after">
+      <div class="before-box">
+        <div class="ba-label">❌ Before — Point-to-point</div>
+        <ul class="ba-list">
+          <li><span class="ico">❌</span> CRM calls ERP directly over HTTP</li>
+          <li><span class="ico">❌</span> Timeout = order lost forever</li>
+          <li><span class="ico">❌</span> No correlation ID across services</li>
+          <li><span class="ico">❌</span> Duplicate orders on every retry</li>
+          <li><span class="ico">❌</span> Status? Call someone in Operations</li>
+          <li><span class="ico">❌</span> Any ERP outage = full system down</li>
+        </ul>
+      </div>
+      <div class="after-box">
+        <div class="ba-label">✅ After — IntegrationHub</div>
+        <ul class="ba-list">
+          <li><span class="ico">✅</span> Asynchronous pipeline decouples CRM from ERP</li>
+          <li><span class="ico">✅</span> Timeout = automatic retry ×3, then dead-letter alert</li>
+          <li><span class="ico">✅</span> Every order gets a correlation ID from APIM to ERP</li>
+          <li><span class="ico">✅</span> Idempotency guarantees: one order created, always</li>
+          <li><span class="ico">✅</span> Real-time status via API and live dashboard</li>
+          <li><span class="ico">✅</span> ERP outage = queue buffers orders, no data loss</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION: SOLUTION ── -->
+<div id="s-solution" class="section">
+  <div class="container">
+    <div class="section-title">💡 Our Solution</div>
+    <p class="section-sub">IntegrationHub is a cloud-native, event-driven integration platform built entirely on Azure PaaS services. It handles the hard problems — reliability, traceability, and security — so source systems only need to POST a single JSON event.</p>
+
+    <div class="card-grid" style="margin-bottom:2rem">
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <div class="card-title">Single Entry Point</div>
+        <div class="card-text">Every source system (CRM, Portal, ERP, manual) sends a single <code style="font-family:monospace;font-size:.82rem;background:rgba(59,139,255,.1);color:#93c5fd;padding:.1rem .35rem;border-radius:4px">POST /api/events</code> to APIM. One URL, one contract, one subscription key. The pipeline does the rest.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔄</div>
+        <div class="card-title">Fully Asynchronous</div>
+        <div class="card-text">APIM returns HTTP 202 Accepted immediately. Order enrichment, queue routing, and ERP delivery happen asynchronously. Source systems are never blocked by downstream latency.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏗️</div>
+        <div class="card-title">Infrastructure as Code</div>
+        <div class="card-text">The entire environment — APIM, Logic App, Function App, Service Bus, Storage, Key Vault, App Insights — is deployed from a single Bicep file. Zero manual portal configuration. Repeatable across dev / test / uat / production.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">💰</div>
+        <div class="card-title">Zero Fixed Cost</div>
+        <div class="card-text">Built entirely on Azure Consumption / Serverless tiers. No idle VMs. Scales from zero to millions of orders. Stays within free tier limits for a prototype workload.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:1rem;font-size:1rem;font-weight:700">Azure Services Used</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem">
+        <div>
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.5rem">Entry Layer</div>
+          <div style="font-size:.85rem;display:flex;flex-direction:column;gap:.35rem">
+            <span>🌐 API Management (Consumption)</span>
+            <span>📋 Logic Apps (Consumption)</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.5rem">Processing Layer</div>
+          <div style="font-size:.85rem;display:flex;flex-direction:column;gap:.35rem">
+            <span>⚡ Azure Functions .NET 10</span>
+            <span>🚌 Service Bus (queues + DLQ)</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.5rem">Storage Layer</div>
+          <div style="font-size:.85rem;display:flex;flex-direction:column;gap:.35rem">
+            <span>📁 Blob Storage (idempotency, payloads)</span>
+            <span>📋 Table Storage (order status)</span>
+            <span>🔐 Key Vault (secrets)</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.5rem">Observability</div>
+          <div style="font-size:.85rem;display:flex;flex-direction:column;gap:.35rem">
+            <span>📊 Application Insights</span>
+            <span>📈 Log Analytics Workspace</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION: FLOW ── -->
+<div id="s-flow" class="section">
+  <div class="container">
+    <div class="section-title">⚙️ How It Works</div>
+    <p class="section-sub">Click each step to see exactly what happens, what data is read/written, and how errors are handled.</p>
+
+    <div class="flow-steps">
+
+      <div class="flow-step open" onclick="toggle(this)">
+        <div class="flow-header">
+          <div class="step-num">1</div>
+          <div class="step-label">Client sends an order event</div>
+          <span class="step-tag tag-apim">APIM</span>
+          <span class="step-chevron">›</span>
+        </div>
+        <div class="flow-body">
+          <ul>
+            <li><strong>What:</strong> Any source system sends <code>POST /api/events</code> with an <code>eventId</code>, <code>eventType</code>, <code>sourceSystem</code>, and <code>payload</code></li>
+            <li><strong>APIM validates:</strong> subscription key, rate limit (10 req / 60 s)</li>
+            <li><strong>APIM injects:</strong> <code>x-correlation-id</code> header — this GUID tracks the order through every service</li>
+            <li><strong>APIM traces:</strong> every request logged to Application Insights automatically</li>
+            <li><strong>Returns:</strong> 202 Accepted immediately — client is never blocked</li>
+            <li><strong>Errors:</strong> 401 (missing key), 429 (rate limit with Retry-After header)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="connector"></div>
+
+      <div class="flow-step" onclick="toggle(this)">
+        <div class="flow-header">
+          <div class="step-num">2</div>
+          <div class="step-label">Logic App orchestrates and validates</div>
+          <span class="step-tag tag-la">Logic App</span>
+          <span class="step-chevron">›</span>
+        </div>
+        <div class="flow-body">
+          <ul>
+            <li><strong>Schema validation:</strong> checks <code>eventId</code> and <code>eventType</code> are present — returns 400 if not</li>
+            <li><strong>Calls:</strong> <code>EnrichOrderFunction</code> via HTTP POST with retry policy (3 retries, 10 s interval)</li>
+            <li><strong>On enrichment network failure:</strong> posts a webhook alert and returns 503</li>
+            <li><strong>On enrichment success:</strong> sends enriched message to Service Bus <code>orders</code> queue</li>
+            <li><strong>Tracked properties:</strong> <code>CorrelationId</code> attached to every Logic App action → queryable in Log Analytics</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="connector"></div>
+
+      <div class="flow-step" onclick="toggle(this)">
+        <div class="flow-header">
+          <div class="step-num">3</div>
+          <div class="step-label">EnrichOrderFunction validates and enriches</div>
+          <span class="step-tag tag-fn">Function</span>
+          <span class="step-chevron">›</span>
+        </div>
+        <div class="flow-body">
+          <ul>
+            <li><strong>Idempotency check:</strong> looks for <code>idempotency-store/{eventId}</code> in Blob Storage — if found, silently returns 200 (duplicate discarded)</li>
+            <li><strong>Field validation:</strong> <code>eventId</code>, <code>eventType</code>, <code>sourceSystem</code>, <code>payload.productCode</code>, <code>payload.quantity</code> required</li>
+            <li><strong>Enrichment:</strong> product description, unit price, total amount, delivery priority (high if qty ≥ 10), routing tag</li>
+            <li><strong>Claim-check:</strong> if serialised order &gt; 64 KB, full payload saved to <code>claim-check-payloads/{date}/{id}.json</code> in Blob; only a reference rides the queue</li>
+            <li><strong>Marks processed:</strong> writes zero-byte marker blob to idempotency store</li>
+            <li><strong>Returns:</strong> enriched <code>EnrichedOrder</code> JSON to Logic App</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="connector"></div>
+
+      <div class="flow-step" onclick="toggle(this)">
+        <div class="flow-header">
+          <div class="step-num">4</div>
+          <div class="step-label">Service Bus queues the enriched order</div>
+          <span class="step-tag tag-sb">Service Bus</span>
+          <span class="step-chevron">›</span>
+        </div>
+        <div class="flow-body">
+          <ul>
+            <li><strong>Queue:</strong> <code>orders</code> queue receives the enriched order</li>
+            <li><strong>Session ID:</strong> set to <code>eventId</code> — guarantees FIFO ordering per order</li>
+            <li><strong>Properties:</strong> <code>correlationId</code>, <code>eventType</code>, <code>sourceSystem</code> in message metadata</li>
+            <li><strong>Max delivery count:</strong> 3 — after 3 failed processing attempts, message moves automatically to Dead Letter Queue (DLQ)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="connector"></div>
+
+      <div class="flow-step" onclick="toggle(this)">
+        <div class="flow-header">
+          <div class="step-num">5</div>
+          <div class="step-label">OrderProcessingFunction delivers to ERP</div>
+          <span class="step-tag tag-fn">Function</span>
+          <span class="step-chevron">›</span>
+        </div>
+        <div class="flow-body">
+          <ul>
+            <li><strong>Triggered by:</strong> Service Bus message on <code>orders</code> queue</li>
+            <li><strong>Deserialise:</strong> JSON fast path; falls back to Base64 decode if needed; logs and rethrows on corrupt data</li>
+            <li><strong>Delivery idempotency:</strong> checks <code>delivery:{eventId}</code> marker — if found, recovers "Completed" status and exits (prevents duplicate ERP POST on retry)</li>
+            <li><strong>Status:</strong> writes <code>Processing</code> to Table Storage before attempting ERP call</li>
+            <li><strong>ERP HTTP POST:</strong> sends <code>correlationId</code>, <code>productCode</code>, <code>quantity</code>, <code>totalAmount</code>, <code>deliveryPriority</code></li>
+            <li><strong>ERP 2xx:</strong> writes <code>Completed</code> to Table Storage, marks delivery idempotency key</li>
+            <li><strong>ERP 4xx/5xx:</strong> writes <code>Failed</code> to Table Storage, message completes (not retried — ERP rejected it)</li>
+            <li><strong>Network exception:</strong> exception propagates → Service Bus abandons → retries up to 3 times → DLQ</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="connector"></div>
+
+      <div class="flow-step" onclick="toggle(this)">
+        <div class="flow-header">
+          <div class="step-num">6</div>
+          <div class="step-label">Status is queryable at any time</div>
+          <span class="step-tag tag-store">Status API</span>
+          <span class="step-chevron">›</span>
+        </div>
+        <div class="flow-body">
+          <ul>
+            <li><strong>Endpoint:</strong> <code>GET /api/status/{correlationId}</code> through APIM → StatusFunction</li>
+            <li><strong>Store:</strong> Azure Table Storage — <code>PartitionKey = sourceSystem</code>, <code>RowKey = correlationId</code></li>
+            <li><strong>State machine:</strong> <code>null → Processing → Completed</code> or <code>Processing → Failed</code></li>
+            <li><strong>Response:</strong> <code>{ status, message, sourceSystem, eventType, lastUpdatedUtc }</code></li>
+            <li><strong>Live dashboard:</strong> auto-polls every 8 s for in-progress orders</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="connector"></div>
+
+      <div class="flow-step" onclick="toggle(this)">
+        <div class="flow-header">
+          <div class="step-num">7</div>
+          <div class="step-label">Dead Letter Queue — nothing is ever lost</div>
+          <span class="step-tag tag-sb">DLQ</span>
+          <span class="step-chevron">›</span>
+        </div>
+        <div class="flow-body">
+          <ul>
+            <li><strong>Trigger:</strong> Timer, runs every 5 minutes</li>
+            <li><strong>Reads:</strong> all messages in the <code>orders</code> Dead Letter Queue</li>
+            <li><strong>Logs:</strong> each dead-lettered message with its <code>correlationId</code>, reason, and source system</li>
+            <li><strong>Alerts:</strong> fires a webhook notification so Operations is immediately aware</li>
+            <li><strong>No data loss:</strong> the original message payload is preserved in the DLQ indefinitely until actioned</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION: RELIABILITY ── -->
+<div id="s-reliability" class="section">
+  <div class="container">
+    <div class="section-title">🛡️ Reliability Guarantees</div>
+    <p class="section-sub">Every failure scenario has been considered and handled. No order is ever silently dropped.</p>
+
+    <div class="rel-grid">
+      <div class="rel-card">
+        <div class="rel-icon">🔁</div>
+        <div class="rel-title">Idempotency — at every stage</div>
+        <div class="rel-text">
+          Two separate idempotency checks prevent duplication:<br><br>
+          <strong>Enrichment:</strong> a zero-byte blob marker per <code style="font-size:.78rem;background:rgba(59,139,255,.1);color:#93c5fd;padding:.1rem .35rem;border-radius:4px">eventId</code> — duplicate submissions are silently accepted (200 OK) without reprocessing.<br><br>
+          <strong>Delivery:</strong> a <code style="font-size:.78rem;background:rgba(59,139,255,.1);color:#93c5fd;padding:.1rem .35rem;border-radius:4px">delivery:{eventId}</code> marker prevents a second ERP POST if the function is retried after a partial success.
+        </div>
+        <div class="rel-tag">Zero duplicate orders</div>
+      </div>
+
+      <div class="rel-card">
+        <div class="rel-icon">📦</div>
+        <div class="rel-title">Claim-Check — unlimited payload size</div>
+        <div class="rel-text">
+          Azure Service Bus has a 64 KB message size limit. IntegrationHub uses the Claim-Check pattern to transparently handle any payload size:<br><br>
+          Payloads over 64 KB are offloaded to Blob Storage. The queue message carries only a reference (<code style="font-size:.78rem;background:rgba(59,139,255,.1);color:#93c5fd;padding:.1rem .35rem;border-radius:4px">IsClaimCheck: true</code>). The processing function retrieves the full payload from Blob when needed.
+        </div>
+        <div class="rel-tag">No payload size limits</div>
+      </div>
+
+      <div class="rel-card">
+        <div class="rel-icon">🔄</div>
+        <div class="rel-title">Retry → Dead Letter — three layers</div>
+        <div class="rel-text">
+          Transient failures (network timeouts, ERP downtime) are handled in layers:<br><br>
+          <strong>Layer 1:</strong> Logic App retries the enrichment function 3 times with 10 s intervals.<br><br>
+          <strong>Layer 2:</strong> Service Bus retries delivery to OrderProcessingFunction up to 3 times automatically.<br><br>
+          <strong>Layer 3:</strong> After all retries exhausted, the message moves to the Dead Letter Queue and a timer function fires a webhook alert.
+        </div>
+        <div class="rel-tag">Nothing silently lost</div>
+      </div>
+
+      <div class="rel-card">
+        <div class="rel-icon">⚡</div>
+        <div class="rel-title">Decoupled — ERP downtime doesn't break CRM</div>
+        <div class="rel-text">
+          Because the pipeline is asynchronous and queue-backed, CRM can keep submitting orders even when the ERP is down for maintenance. Orders queue up in Service Bus and are delivered automatically when ERP comes back online.
+        </div>
+        <div class="rel-tag">ERP outage = zero impact on CRM</div>
+      </div>
+
+      <div class="rel-card">
+        <div class="rel-icon">🚦</div>
+        <div class="rel-title">Rate limiting — protect downstream systems</div>
+        <div class="rel-text">
+          APIM enforces a rate limit of 10 requests per 60-second window per subscription key. This protects the entire pipeline from traffic spikes, bot abuse, and runaway client loops. Rate-limited callers receive a <code style="font-size:.78rem;background:rgba(59,139,255,.1);color:#93c5fd;padding:.1rem .35rem;border-radius:4px">429</code> with a <code style="font-size:.78rem;background:rgba(59,139,255,.1);color:#93c5fd;padding:.1rem .35rem;border-radius:4px">Retry-After</code> header.
+        </div>
+        <div class="rel-tag">Abuse-resistant by design</div>
+      </div>
+
+      <div class="rel-card">
+        <div class="rel-icon">📊</div>
+        <div class="rel-title">Status state machine — always know where an order is</div>
+        <div class="rel-text">
+          Every order transitions through a defined state machine written to Table Storage in real time:<br><br>
+          <code style="font-family:monospace;font-size:.78rem">null → Processing → Completed</code><br>
+          <code style="font-family:monospace;font-size:.78rem">null → Processing → Failed</code><br><br>
+          Any client can query the current state at any time via <code style="font-size:.78rem;background:rgba(59,139,255,.1);color:#93c5fd;padding:.1rem .35rem;border-radius:4px">GET /api/status/{correlationId}</code>.
+        </div>
+        <div class="rel-tag">Real-time status for every order</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION: OBSERVABILITY ── -->
+<div id="s-observability" class="section">
+  <div class="container">
+    <div class="section-title">📊 Observability</div>
+    <p class="section-sub">Every service emits structured logs tagged with a correlation ID. A single KQL query shows the complete journey of any order across every Azure service.</p>
+
+    <div class="obs-flow">
+      <div class="obs-node">📡 APIM</div>
+      <span class="obs-arrow">→</span>
+      <div class="obs-node">📋 Logic App</div>
+      <span class="obs-arrow">→</span>
+      <div class="obs-node">⚡ Functions</div>
+      <span class="obs-arrow">→</span>
+      <div class="obs-node">📊 App Insights</div>
+      <span class="obs-arrow">+</span>
+      <div class="obs-node">📈 Log Analytics</div>
+    </div>
+
+    <div style="margin-bottom:2rem">
+      <div style="font-weight:700;margin-bottom:.5rem">End-to-end order trace — one query</div>
+      <div style="font-size:.83rem;color:var(--muted);margin-bottom:.75rem">Paste a correlationId to see every step of that order across APIM, Logic App, and all Functions in chronological order:</div>
+      <div class="kql-block"><span class="kql-comment">// End-to-end journey of a single order</span>
+<span class="kql-keyword">let</span> cid = <span class="kql-string">"paste-your-correlation-id"</span>;
+AppTraces
+| <span class="kql-keyword">where</span> Message <span class="kql-keyword">startswith</span> <span class="kql-string">"Business Flow:"</span>
+| <span class="kql-keyword">where</span> tostring(Properties.CorrelationId) == cid
+| <span class="kql-keyword">project</span> TimeGenerated, Source = <span class="kql-string">"Function/APIM"</span>, Message
+| <span class="kql-keyword">union</span> (
+    LogicAppWorkflowRuntime
+    | <span class="kql-keyword">where</span> trackedProperties_CorrelationId_s == cid
+    | <span class="kql-keyword">project</span> TimeGenerated, Source = <span class="kql-string">"Logic App"</span>,
+              Message = trackedProperties_BusinessFlowMessage_s
+)
+| <span class="kql-keyword">order by</span> TimeGenerated <span class="kql-keyword">asc</span></div>
+    </div>
+
+    <div style="margin-bottom:2rem">
+      <div style="font-weight:700;margin-bottom:.5rem">What you see in App Insights (per order)</div>
+      <div class="card" style="padding:1.25rem">
+        <table style="width:100%;border-collapse:collapse;font-size:.83rem">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border)">
+              <th style="text-align:left;padding:.5rem;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em">Time</th>
+              <th style="text-align:left;padding:.5rem;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em">Source</th>
+              <th style="text-align:left;padding:.5rem;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em">Business Flow Event</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+              <td style="padding:.5rem;color:var(--muted);white-space:nowrap">T+0.0s</td>
+              <td style="padding:.5rem"><span class="step-tag tag-apim">APIM</span></td>
+              <td style="padding:.5rem">Business Flow: Request entered APIM. CorrelationId: abc-123</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+              <td style="padding:.5rem;color:var(--muted)">T+0.1s</td>
+              <td style="padding:.5rem"><span class="step-tag tag-la">Logic App</span></td>
+              <td style="padding:.5rem">Business Flow: Order enrichment requested from Logic App.</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+              <td style="padding:.5rem;color:var(--muted)">T+0.2s</td>
+              <td style="padding:.5rem"><span class="step-tag tag-fn">Function</span></td>
+              <td style="padding:.5rem">Business Flow: Order received for processing. EventId: abc-123</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+              <td style="padding:.5rem;color:var(--muted)">T+0.4s</td>
+              <td style="padding:.5rem"><span class="step-tag tag-fn">Function</span></td>
+              <td style="padding:.5rem">Business Flow: Order enriched. ProductCode: SKU-9001, TotalAmount: 2598</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+              <td style="padding:.5rem;color:var(--muted)">T+0.5s</td>
+              <td style="padding:.5rem"><span class="step-tag tag-la">Logic App</span></td>
+              <td style="padding:.5rem">Business Flow: Order validated and routed to Service Bus queue.</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+              <td style="padding:.5rem;color:var(--muted)">T+1.2s</td>
+              <td style="padding:.5rem"><span class="step-tag tag-fn">Function</span></td>
+              <td style="padding:.5rem">Business Flow: Order picked up from queue for delivery. ProductCode: SKU-9001</td>
+            </tr>
+            <tr>
+              <td style="padding:.5rem;color:var(--muted)">T+1.8s</td>
+              <td style="padding:.5rem"><span class="step-tag tag-fn">Function</span></td>
+              <td style="padding:.5rem">Business Flow: Order delivered successfully to ERP.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:.5rem">Dead-letter alert query</div>
+        <div class="kql-block" style="margin:0;font-size:.73rem"><span class="kql-keyword">traces</span>
+| <span class="kql-keyword">where</span> timestamp &gt; ago(24h)
+| <span class="kql-keyword">where</span> message <span class="kql-keyword">has</span> <span class="kql-string">"DeadLetter"</span>
+| <span class="kql-keyword">project</span> timestamp,
+    correlationId = tostring(
+      customDimensions.correlationId),
+    reason, sourceSystem
+| <span class="kql-keyword">order by</span> timestamp desc</div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:.5rem">What's monitored</div>
+        <ul style="list-style:none;font-size:.85rem;display:flex;flex-direction:column;gap:.5rem;color:var(--muted)">
+          <li>✅ Every APIM request (status, latency, subscription)</li>
+          <li>✅ Every Logic App run (step-by-step trace with tracked properties)</li>
+          <li>✅ Every Function invocation (duration, success/fail)</li>
+          <li>✅ Service Bus message counts (active + dead-letter)</li>
+          <li>✅ Business Flow events across all services</li>
+          <li>✅ ERP delivery results (Completed / Failed / NotConfigured)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION: SECURITY ── -->
+<div id="s-security" class="section">
+  <div class="container">
+    <div class="section-title">🔒 Security</div>
+    <p class="section-sub">Designed with zero stored credentials. Every service authenticates via Managed Identity — no passwords, no connection strings in code.</p>
+
+    <div class="sec-grid" style="margin-bottom:2rem">
+      <div class="sec-card">
+        <div class="sec-ico">🔑</div>
+        <div>
+          <div class="sec-label">API Authentication</div>
+          <div class="sec-value">APIM Subscription Key</div>
+          <div class="sec-sub">Every inbound request must carry a valid <code style="font-family:monospace;font-size:.78rem">Ocp-Apim-Subscription-Key</code> header. Invalid keys are rejected with 401.</div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-ico">🪪</div>
+        <div>
+          <div class="sec-label">Azure Service Authentication</div>
+          <div class="sec-value">Managed Identity</div>
+          <div class="sec-sub">Function App and Logic App use System-Assigned Managed Identity with least-privilege RBAC roles. No connection strings in code or config.</div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-ico">🗝️</div>
+        <div>
+          <div class="sec-label">Secret Management</div>
+          <div class="sec-value">Azure Key Vault (RBAC)</div>
+          <div class="sec-sub">All secrets (ERP endpoint URL, webhooks) stored in Key Vault. Function App reads via Key Vault references — the secret never touches app configuration directly.</div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-ico">🔒</div>
+        <div>
+          <div class="sec-label">Transport</div>
+          <div class="sec-value">HTTPS Only</div>
+          <div class="sec-sub"><code style="font-family:monospace;font-size:.78rem">httpsOnly: true</code> on Function App. APIM configured for HTTPS protocols only. No plain HTTP accepted anywhere in the pipeline.</div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-ico">🗄️</div>
+        <div>
+          <div class="sec-label">Storage Access</div>
+          <div class="sec-value">No Public Blob Access</div>
+          <div class="sec-sub"><code style="font-family:monospace;font-size:.78rem">allowBlobPublicAccess: false</code> on the Storage Account. All blob reads/writes go through authenticated Azure SDK calls.</div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-ico">♻️</div>
+        <div>
+          <div class="sec-label">Data Protection</div>
+          <div class="sec-value">Soft-Delete Enabled</div>
+          <div class="sec-sub">Key Vault and Blob Storage both have soft-delete enabled (7-day recovery window). Accidental deletions are recoverable.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:1rem">RBAC role assignments (least privilege)</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.83rem">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:.5rem;color:var(--muted);font-size:.7rem;text-transform:uppercase">Identity</th>
+            <th style="text-align:left;padding:.5rem;color:var(--muted);font-size:.7rem;text-transform:uppercase">Resource</th>
+            <th style="text-align:left;padding:.5rem;color:var(--muted);font-size:.7rem;text-transform:uppercase">Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:.5rem">Function App</td>
+            <td style="padding:.5rem">Storage Account</td>
+            <td style="padding:.5rem;color:#4ade80">Storage Blob Data Contributor</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:.5rem">Function App</td>
+            <td style="padding:.5rem">Storage Account</td>
+            <td style="padding:.5rem;color:#4ade80">Storage Table Data Contributor</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:.5rem">Function App</td>
+            <td style="padding:.5rem">Key Vault</td>
+            <td style="padding:.5rem;color:#4ade80">Key Vault Secrets User</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:.5rem">Function App</td>
+            <td style="padding:.5rem">Service Bus</td>
+            <td style="padding:.5rem;color:#4ade80">Service Bus Data Receiver</td>
+          </tr>
+          <tr>
+            <td style="padding:.5rem">Logic App</td>
+            <td style="padding:.5rem">Service Bus</td>
+            <td style="padding:.5rem;color:#4ade80">Service Bus Data Sender</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION: DEMO ── -->
+<div id="s-demo" class="section">
+  <div class="container">
+    <div class="section-title">🚀 Live Demo</div>
+    <p class="section-sub">The platform is deployed and running. You can send a real order and watch it flow through the entire pipeline in real time.</p>
+
+    <div class="demo-grid">
+      <div class="demo-card">
+        <div class="card-title" style="margin-bottom:1rem">Step-by-step demo</div>
+        <div class="demo-step">
+          <div class="demo-num">1</div>
+          <div class="demo-text">Open the <strong>Live Dashboard</strong> at the URL below and enter the APIM subscription key</div>
+        </div>
+        <div class="demo-step">
+          <div class="demo-num">2</div>
+          <div class="demo-text">Click <strong>Send Order Event</strong> — the form pre-fills with a realistic SKU-9001 order</div>
+        </div>
+        <div class="demo-step">
+          <div class="demo-num">3</div>
+          <div class="demo-text">Watch the <strong>Live Order Feed</strong> show <em>Processing</em> — then update to <em>Completed</em> within seconds</div>
+        </div>
+        <div class="demo-step">
+          <div class="demo-num">4</div>
+          <div class="demo-text">Copy the Correlation ID and run the <strong>KQL query</strong> in App Insights to see the full trace</div>
+        </div>
+        <div class="demo-step">
+          <div class="demo-num">5</div>
+          <div class="demo-text">Send the same order again — note it is immediately accepted (HTTP 202) but <strong>not processed twice</strong> (idempotency)</div>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div class="card-title" style="margin-bottom:1rem">Endpoints</div>
+
+        <div style="margin-bottom:1.25rem">
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.35rem">Dashboard</div>
+          <div class="demo-endpoint">https://d-az1-ih-gw-apim.azure-api.net/api/dashboard</div>
+        </div>
+
+        <div style="margin-bottom:1.25rem">
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.35rem">Submit Order</div>
+          <div class="demo-endpoint">POST https://d-az1-ih-gw-apim.azure-api.net/api/events</div>
+        </div>
+
+        <div style="margin-bottom:1.25rem">
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.35rem">Check Status</div>
+          <div class="demo-endpoint">GET https://d-az1-ih-gw-apim.azure-api.net/api/status/{correlationId}</div>
+        </div>
+
+        <div>
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.35rem">Subscription Key</div>
+          <div class="demo-endpoint" style="color:var(--muted)">Contact the team for the demo key</div>
+        </div>
+
+        <div style="margin-top:1.5rem;padding:1rem;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:8px;font-size:.82rem">
+          <span style="color:#4ade80;font-weight:700">✓ Sample order payload</span><br>
+          <pre style="margin-top:.5rem;color:var(--muted);font-family:monospace;font-size:.75rem">{
+  "eventId": "demo-001",
+  "eventType": "OrderCreated",
+  "sourceSystem": "CRM",
+  "payload": {
+    "productCode": "SKU-9001",
+    "quantity": 2,
+    "customerId": "cust-1234"
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION: NEXT ── -->
+<div id="s-next" class="section">
+  <div class="container">
+    <div class="section-title">📋 Prototype → Production</div>
+    <p class="section-sub">This prototype demonstrates the integration patterns, infrastructure automation, and operational practices of a production-grade system. The following gaps represent the natural next steps before a production go-live.</p>
+
+    <div class="card" style="margin-bottom:2rem">
+      <table class="gap-table">
+        <thead>
+          <tr>
+            <th>Gap</th>
+            <th>Priority</th>
+            <th>Production Approach</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>No OAuth / JWT authentication on APIM</td>
+            <td><span class="priority p-high">High</span></td>
+            <td>Add Entra ID JWT validation policy — validate audience, issuer, and scopes on every inbound request</td>
+          </tr>
+          <tr>
+            <td>Dashboard has no auth</td>
+            <td><span class="priority p-high">High</span></td>
+            <td>Enable Entra ID Easy Auth on the Function App to require login before the dashboard loads</td>
+          </tr>
+          <tr>
+            <td>Single Azure region</td>
+            <td><span class="priority p-high">High</span></td>
+            <td>Geo-redundant Storage (GRS), paired region failover, Traffic Manager for APIM</td>
+          </tr>
+          <tr>
+            <td>Rate limit is global (all callers share one limit)</td>
+            <td><span class="priority p-med">Medium</span></td>
+            <td>APIM Products with per-caller quotas — separate tiers for CRM, Portal, ERP</td>
+          </tr>
+          <tr>
+            <td>No message schema registry</td>
+            <td><span class="priority p-med">Medium</span></td>
+            <td>Azure Schema Registry with Avro or JSON Schema — enforced governance for all message formats</td>
+          </tr>
+          <tr>
+            <td>Webhook URL for failure alerts</td>
+            <td><span class="priority p-med">Medium</span></td>
+            <td>Azure Monitor alerts + Action Groups → email / Teams / PagerDuty integration</td>
+          </tr>
+          <tr>
+            <td>Status table has no data expiry</td>
+            <td><span class="priority p-low">Low</span></td>
+            <td>Table Storage lifecycle policy to purge rows older than 90 days</td>
+          </tr>
+          <tr>
+            <td>ERP endpoint is a flat config value</td>
+            <td><span class="priority p-low">Low</span></td>
+            <td>API Management backend entity with health probes and circuit breaker policy</td>
+          </tr>
+          <tr>
+            <td>No load or chaos testing</td>
+            <td><span class="priority p-low">Low</span></td>
+            <td>Azure Load Testing (k6) + Azure Chaos Studio to validate retry and DLQ behaviour under real traffic</td>
+          </tr>
+          <tr>
+            <td>Single Service Bus queue for all orders</td>
+            <td><span class="priority p-low">Low</span></td>
+            <td>Separate queues per source system or order priority tier — independent scaling and dead-letter handling</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">✅</div>
+        <div class="card-title">What this prototype proves</div>
+        <div class="card-text" style="margin-top:.5rem">
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:.4rem">
+            <li>✅ End-to-end integration pattern works at real scale</li>
+            <li>✅ Idempotency and claim-check hold under repeated submissions</li>
+            <li>✅ Every failure scenario has a defined, tested response</li>
+            <li>✅ Infrastructure is fully automated — zero manual portal steps</li>
+            <li>✅ Observability traces every order from APIM to ERP</li>
+            <li>✅ CI/CD deploys all 7 Azure services in one pipeline run</li>
+            <li>✅ 28 unit tests protect core business logic</li>
+            <li>✅ Entire system stays within Azure free tier for a prototype workload</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🗺️</div>
+        <div class="card-title">Suggested phased delivery</div>
+        <div class="card-text" style="margin-top:.5rem">
+          <div style="display:flex;flex-direction:column;gap:.75rem">
+            <div>
+              <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#4ade80;margin-bottom:.2rem">Phase 1 — Security hardening</div>
+              <div style="font-size:.82rem;color:var(--muted)">JWT auth on APIM, Easy Auth on dashboard, per-caller rate limits</div>
+            </div>
+            <div>
+              <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#fbbf24;margin-bottom:.2rem">Phase 2 — Production reliability</div>
+              <div style="font-size:.82rem;color:var(--muted)">Multi-region, Azure Monitor alerts, schema registry, load testing</div>
+            </div>
+            <div>
+              <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7eb8ff;margin-bottom:.2rem">Phase 3 — Scale & governance</div>
+              <div style="font-size:.82rem;color:var(--muted)">Per-source queues, circuit breaker, chaos testing, data retention policies</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p style="margin-bottom:.4rem"><strong>IntegrationHub</strong> — Azure Event-Driven Integration Platform · Prototype v1.0</p>
+  <p>Built by <a href="https://github.com/vivekkajavadra">Vivek Kajavadra</a> and <a href="https://github.com/karthikeyan-tc">Karthikeyan T C</a></p>
+</footer>
+
+<script>
+  // ── Tab switching ──
+  function show(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('s-' + id).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Flow step accordion ──
+  function toggle(el) {
+    el.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
